@@ -1,16 +1,17 @@
 import React, { Component } from 'react';
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
 
-class WhatsThatapp extends Component {
+import SignupScreen from './components/Signup';
+
+export default class App extends Component {
+  constructor(props){
+    super(props);
+  }
+
   render(){
-
     return (
-        <View>
-          <Text>Hello World</Text>
-        </View>
+        <SignupScreen />
     );
   }
 }
-
-export default WhatsThatapp
 

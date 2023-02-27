@@ -60,6 +60,10 @@ class Login extends Component {
         <>
           {this.state.error && <Text>{this.state.error}</Text>}
         </>
+        <Button
+        title="Don't have an account? Click here to sign up"
+        onPress={() => this.props.navigation.navigate('Signup')}
+        />
       </View>
     );
   }

@@ -19,6 +19,39 @@ class Signup extends Component {
     this.onPressButton = this.onPressButton.bind(this)
   }
 
+  addUser(){
+    return fetch("http://localhost:3333/api/1.0.0/user",
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        first_name: this.state.firstname,
+        last_name: this.state.lastname,
+        email: this.state.email,
+        password: this.state.password
+      })
+    })
+    .then((response) => {
+      if(response.status === 201){
+        return response.json();
+      }else if(response.status === 400){
+        throw "Email already exists or password isn't strong enough"
+      }else{
+        throw "Something went wrong"
+      }
+    })
+    .then((rjson) => {
+      console.log(rjson)
+      this.setState({"error": "User added successfully"})
+      this.setState({"submitted": false})
+      this.props.navigation.navigate('Login')
+    })
+    .catch((error) => {
+      this.setState({"error": error})
+      this.setState({"submitted": false})
+    });
+  }
+
   onPressButton(){
     this.setState({submitted: true})
     this.setState({error: ""})
@@ -39,8 +72,10 @@ class Signup extends Component {
             return;
         }   
 
-    this.props.navigation.navigate('Login')
+    this.addUser()
   }
+
+
 
   render() {
     return (

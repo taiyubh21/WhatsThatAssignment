@@ -3,6 +3,7 @@ import { Text, TextInput, View,TouchableOpacity, Button, Alert } from 'react-nat
 
 
 import * as EmailValidator from 'email-validator';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 class Login extends Component {
   constructor(props){
@@ -15,6 +16,38 @@ class Login extends Component {
       submitted: false
     }
     this.onPressButton = this.onPressButton.bind(this)
+  }
+
+  userLogin(){
+    return fetch("http://localhost:3333/api/1.0.0/login",
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: this.state.email,
+        password: this.state.password
+      })
+    })
+    .then((response) => {
+      if(response.status === 200){
+        return response.json();
+      }else if(response.status === 400){
+        throw "error"
+      }
+    })
+    .then(async (rJson) => {
+      console.log(rJson)
+      try{
+        await AsyncStorage.setItem("whatsthat_user_id",rJson.id)
+        await AsyncStorage.setItem("whatsthat_session_token",rJson.token)
+        
+        this.setState({"submitted": false})
+
+        this.props.navigation.navigate("Contacts")
+      }catch{
+        throw "Something went wrong"
+      }
+  })
   }
 
   onPressButton(){
@@ -37,9 +70,7 @@ class Login extends Component {
             return;
         }    
 
-
-      console.log("Button clicked: " + this.state.email + " " + this.state.password)
-      console.log("success")
+        this.userLogin()
   }
 
   render() {

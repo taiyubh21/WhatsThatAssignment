@@ -56,7 +56,7 @@ class Signup extends Component {
     this.setState({submitted: true})
     this.setState({error: ""})
 
-    if(!(this.state.firstname && this.state.lastname &&this.state.email && this.state.password)){
+    if(!(this.state.firstname && this.state.lastname && this.state.email && this.state.password)){
       this.setState({error: "Must enter first name, last name, email and password"})
       return;    
     }
@@ -64,13 +64,26 @@ class Signup extends Component {
     if(!EmailValidator.validate(this.state.email)){
       this.setState({error: "Must enter valid email"})
       return;
-  }
+    }
+
+    const NAME_REGEX = new RegExp("^[A-Z][A-Za-z]+$")
+
+    if(!NAME_REGEX.test(this.state.firstname)){
+      this.setState({error: "First name must start with capital letter and have no spaces, numbers or symbols"})
+      return;
+    }
+
+    if(!NAME_REGEX.test(this.state.lastname)){
+      this.setState({error: "Last name must start with capital letter and have no spaces, numbers or symbols"})
+      return;
+    }
 
     const PASSWORD_REGEX = new RegExp("^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$")
     if(!PASSWORD_REGEX.test(this.state.password)){
             this.setState({error: "Password isn't strong enough (One upper, one lower, one special, one number, at least 8 characters long)"})
             return;
-        }   
+          }   
+    
 
     this.addUser()
   }

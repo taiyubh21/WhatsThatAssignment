@@ -43,7 +43,7 @@ class Login extends Component {
         
         this.setState({"submitted": false})
 
-        this.props.navigation.navigate("Contacts")
+        this.props.navigation.navigate("TabNav")
       }catch{
         throw "Something went wrong"
       }

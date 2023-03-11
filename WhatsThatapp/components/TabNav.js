@@ -12,6 +12,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 // Importing the two screens needed for the navigation
 import ContactsScreen from './Contacts';
 import ChatListScreen from './ChatList';
+import UserListScreen from './UserListDisplay';
 
 const Tab = createBottomTabNavigator();
 
@@ -24,6 +25,7 @@ export default class TabNav extends Component {
           {/* The screens in the tab navigation*/}
           <Tab.Screen name = 'Contacts' component={ContactsScreen} />
           <Tab.Screen name = 'ChatList' component={ChatListScreen} />
+          <Tab.Screen name = 'UserList' component={UserListScreen} />
         </Tab.Navigator>
     );
 

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { FlatList, View, ActivityIndicator, Text } from 'react-native';
+import { FlatList, View, ActivityIndicator, Text, TextInput, Button } from 'react-native';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -14,7 +14,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
             // For array of user data
             userListData: [],
             // For holding the ID of current user
-            currentUserId: null
+            currentUserId: null,
+            // To store users search query
+            saveQuery: ""
         };
         this.setCurrentUserId();
     }
@@ -28,7 +30,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
       }
 
     async getData(){
-        return fetch("http://localhost:3333/api/1.0.0/search", {
+        // Changing the API link to include the search parameter state
+        return fetch("http://localhost:3333/api/1.0.0/search?q=" + this.state.saveQuery, {
             method: "GET",
             headers: {
               "X-Authorization": await AsyncStorage.getItem("whatsthat_session_token")
@@ -63,6 +66,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
     }else{
         return(
             <View>
+                {/* Update saveQuery state with value from input */}
+                {/* Set default value to the current saveQuery state */}
+                <TextInput placeholder = "Search..." onChangeText={saveQuery => this.setState({saveQuery})} defaultValue={this.state.saveQuery}></TextInput>
+                {/* Refreshing list of users when button is pressed */}
+                <Button
+                    title="Search"
+                    onPress={() => this.getData()}
+                />
                 <FlatList
                     data={this.state.userListData}              
                     renderItem= {({item}) => {

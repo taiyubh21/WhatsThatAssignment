@@ -41,6 +41,8 @@ class Login extends Component {
         return response.json();
       // Else if its bad then throw an error
       }else if(response.status === 400){
+        // Output error on screen if theres a 400 response
+        this.setState({error: "Retype password and/or email"})
         throw "error"
       }
     })

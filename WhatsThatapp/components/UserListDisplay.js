@@ -53,7 +53,17 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
     componentDidMount(){
         this.getData();
+        this.props.navigation.addListener('focus', this.resetSearch);
     }
+
+    componentWillUnmount() {
+        this.props.navigation.removeListener('focus', this.resetSearch);
+    }
+
+    resetSearch() {
+        this.setState({ saveQuery: "" });
+    }
+    
 
   render(){
     // If data is still being fetched return a loading spinner
@@ -86,7 +96,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
                         if(item.user_id !== this.state.currentUserId){
                             return(
                                 <View>
-                                    {/* Concatenating first name and last name together */}
+                                    {/* Concatenating first name and last name together */}                        
                                     <Text>{item.given_name + ' ' + item.family_name}</Text> 
                                     <Text>{item.email}</Text> 
                                     {/* Empty line inbetween account details*/}

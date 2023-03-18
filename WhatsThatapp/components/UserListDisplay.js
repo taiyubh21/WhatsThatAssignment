@@ -51,18 +51,24 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
         });
     }
 
-    componentDidMount(){
+    componentDidMount() {
         this.getData();
-        this.props.navigation.addListener('focus', this.resetSearch);
-    }
-
-    componentWillUnmount() {
-        this.props.navigation.removeListener('focus', this.resetSearch);
-    }
-
-    resetSearch() {
-        this.setState({ saveQuery: "" });
-    }
+        this.resetData = this.props.navigation.addListener('focus', () => {
+          // Reset states back to how they were
+          this.setState({
+            isLoading: true,
+            userListData: [],
+            saveQuery: ""
+          }, () => {
+            // Call getData after resetting the state
+            this.getData();
+          });
+        });
+      }
+    
+      componentWillUnmount() {
+        this.resetData();
+      }
     
 
   render(){

@@ -34,6 +34,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
         return fetch("http://localhost:3333/api/1.0.0/search?q=" + this.state.saveQuery, {
             method: "GET",
             headers: {
+              'Content-Type': 'application/json',
               "X-Authorization": await AsyncStorage.getItem("whatsthat_session_token")
             }
           })    
@@ -50,6 +51,26 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
             console.log(error);
         });
     }
+
+    async addContacts(contactuserID){
+        return fetch("http://localhost:3333/api/1.0.0/user/" + contactuserID + "/contact",
+        {
+          method: 'POST',
+          headers: {
+            "X-Authorization": await AsyncStorage.getItem("whatsthat_session_token")
+          }
+        })
+        .then((response) => {
+            // If the response is ok  
+            if(response.status === 200){
+                console.log('Contact added successfully');
+            // Else if its bad then throw an error
+            }else{
+              // Output error on screen for other responses
+              throw "error"
+            }
+          })
+      }
 
     componentDidMount() {
         this.getData();
@@ -105,6 +126,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
                                     {/* Concatenating first name and last name together */}                        
                                     <Text>{item.given_name + ' ' + item.family_name}</Text> 
                                     <Text>{item.email}</Text> 
+                                    <Button
+                                        title="Add to contacts"
+                                        onPress={() => this.addContacts(item.user_id)}
+                                    />
                                     {/* Empty line inbetween account details*/}
                                     <Text>{' '}</Text>
                                 </View>

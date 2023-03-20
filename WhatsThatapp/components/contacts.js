@@ -12,8 +12,8 @@ class Contacts extends Component {
             // Used for loading icon
             isLoading: true,
             // For array of contact data
-            contactData: [],
-        };
+            contactData: []
+        }
     }
 
     async getData(){
@@ -32,7 +32,9 @@ class Contacts extends Component {
                 isLoading: false,
                 contactData: responseJson
             })
-            console.log(responseJson)
+            console.log(responseJson);
+            console.log(contactData);
+            
         })
         .catch((error)=> {
             console.log(error);
@@ -52,19 +54,22 @@ class Contacts extends Component {
                 </View>
             );
         }else{
+            console.log("here:", this.state.contactData)
             return(
                 <View>
                     <FlatList
                         data={this.state.contactData}              
-                        renderItem= {({item}) => {
+                        renderItem= {({item}) => (
                             <View>
+                                {/*<Text>{JSON.stringify(item)}</Text>*/}
+
                                 {/* Concatenating first name and last name together */}                        
                                 <Text>{item.first_name + ' ' + item.last_name}</Text> 
                                 <Text>{item.email}</Text> 
                                 {/* Empty line inbetween account details*/}
                                 <Text>{' '}</Text>
                             </View>
-                        }}
+                            )}
                         keyExtractor={(item) => item.user_id}
                     />
                 </View>

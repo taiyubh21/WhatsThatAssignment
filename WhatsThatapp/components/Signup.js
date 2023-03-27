@@ -50,14 +50,16 @@ class Signup extends Component {
     })
     .then((rjson) => {
       console.log(rjson)
-      this.setState({"error": "User added successfully"})
-      this.setState({"submitted": false})
+      this.setState({error: "User added successfully"})
+      this.setState({submitted: false})
+      console.log(this.state.error)
       // Navigate to login screen if sign up was successful
       this.props.navigation.navigate('Login')
     })
     .catch((error) => {
-      this.setState({"error": error})
-      this.setState({"submitted": false})
+      console.log(error)
+      this.setState({error: "error"})
+      this.setState({submitted: false})
     });
   }
 

@@ -6,7 +6,7 @@ import * as EmailValidator from 'email-validator';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-class Signup extends Component {
+class ProfileUpdate extends Component {
   constructor(props){
     super(props);
 
@@ -28,13 +28,37 @@ class Signup extends Component {
     this.setCurrentUserId();
   }
 
-    // Getting the current ID from async storage
-    // Setting it to the new state
-    // Making sure its an integer
-    async setCurrentUserId() {
-        const userId = await AsyncStorage.getItem("whatsthat_user_id");
-        this.setState({ currentUserId: parseInt(userId) });
-      }
+  // Getting the current ID from async storage
+  // Setting it to the new state
+  // Making sure its an integer
+  async setCurrentUserId() {
+      const userId = await AsyncStorage.getItem("whatsthat_user_id");
+      this.setState({ currentUserId: parseInt(userId) });
+      console.log("Current user ID:" + this.state.currentUserId);
+    }
+
+    async getData(){
+      return fetch("http://localhost:3333/api/1.0.0/user/" + this.state.currentUserId, {
+          method: "GET",
+          headers: {
+            'Content-Type': 'application/json',
+            "X-Authorization": await AsyncStorage.getItem("whatsthat_session_token")
+          }
+        })    
+      .then((response) => response.json())
+      .then((responseJson) => {
+          // Updating each state with their data
+          this.setState({
+              isLoading: false,
+              firstname: responseJson.first_name,
+              lastname: responseJson.last_name,
+              email: responseJson.email
+          })
+      })
+      .catch((error)=> {
+          console.log(error);
+      });
+  }
 
   //Updating user - interacting with the API
   async updateUser(){
@@ -56,7 +80,8 @@ class Signup extends Component {
     if(this.state.password != ""){
         to_send['password'] = this.state.password
     }
-
+    
+    console.log('Request payload:', JSON.stringify(to_send));
     return fetch("http://localhost:3333/api/1.0.0/user/" + this.state.currentUserId,
     {
       method: 'PATCH',
@@ -67,10 +92,11 @@ class Signup extends Component {
       body: JSON.stringify(to_send)
     })
     // Handles API response
-    // Checks if it is a success and user was created or if there is an error
+    // Checks if it is a success or if there is an error
     .then((response) => {
-      if(response.status === 201){
-        return response.json();
+      console.log(response); // log the entire response object
+      if(response.status === 200){
+        console.log("User has been updated");
       }else if(response.status === 400){
         throw "Please try again"
       }
@@ -88,43 +114,64 @@ class Signup extends Component {
     this.setState({error: ""})
 
     // If inputs aren't valid according to the validation error message will return
-
+    // If inputs are null no need for validation
     // Checks with the email validator if the email is valid
-    if(!EmailValidator.validate(this.state.email)){
-      this.setState({error: "Must enter valid email"})
-      return;
+    if(this.state.email != ""){
+      if(!EmailValidator.validate(this.state.email)){
+        this.setState({error: "Must enter valid email"})
+        return;
+      }
     }
 
     // Reg Ex to validate first and last name
     const NAME_REGEX = new RegExp("^[A-Z][A-Za-z]+$")
 
     // Check if first name is valid
-    if(!NAME_REGEX.test(this.state.firstname)){
-      this.setState({error: "First name must start with capital letter and have no spaces, numbers or symbols"})
-      return;
-    }
+    if(this.state.firstname != ""){
+      if(!NAME_REGEX.test(this.state.firstname)){
+        this.setState({error: "First name must start with capital letter and have no spaces, numbers or symbols"})
+        return;
+      }
+  }
 
     // Check if last name is valid
-    if(!NAME_REGEX.test(this.state.lastname)){
-      this.setState({error: "Last name must start with capital letter and have no spaces, numbers or symbols"})
-      return;
+    if(this.state.lastname != ""){
+      if(!NAME_REGEX.test(this.state.lastname)){
+        this.setState({error: "Last name must start with capital letter and have no spaces, numbers or symbols"})
+        return;
+      }
     }
 
     // Reg Ex to validate password
     const PASSWORD_REGEX = new RegExp("^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$")
+    
     // Check if password is valid
-    if(!PASSWORD_REGEX.test(this.state.password)){
-            this.setState({error: "Password isn't strong enough (One upper, one lower, one special, one number, at least 8 characters long)"})
-            return;
-          }   
+    if(this.state.password != ""){
+      if(!PASSWORD_REGEX.test(this.state.password)){
+        this.setState({error: "Password isn't strong enough (One upper, one lower, one special, one number, at least 8 characters long)"})
+        return;
+      }   
+    }
     
     // If all validation is successful all the updateUser to make a PATCH request to the server
     this.updateUser()
   }
 
-
+  componentDidMount() {
+    this.setCurrentUserId()
+      .then(() => this.getData())
+      .catch((error) => console.log(error));
+  }
 
   render() {
+        // If data is still being fetched return a loading spinner
+        if(this.state.isLoading){
+          return(
+              <View>
+                  <ActivityIndicator/>
+              </View>
+          );
+        }else{
     return (
       <View>
         {/* First name input text */}
@@ -157,7 +204,8 @@ class Signup extends Component {
       </View>
     );
   }
+}
 
 }
 
-export default Signup
+export default ProfileUpdate

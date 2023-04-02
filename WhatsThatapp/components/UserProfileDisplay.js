@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text, TextInput, View,TouchableOpacity, Button, Alert } from 'react-native';
+import { Text, TextInput, View, TouchableOpacity, Image} from 'react-native';
 
 // Import to handle email validation
 import * as EmailValidator from 'email-validator';
@@ -22,6 +22,7 @@ class ProfileUpdate extends Component {
       submitted: false,
       // For holding the ID of current user
       currentUserId: null,
+      photo: null
     }
     // Binding to onPressButton function
     this.onPressButton = this.onPressButton.bind(this)
@@ -31,11 +32,35 @@ class ProfileUpdate extends Component {
   // Getting the current ID from async storage
   // Setting it to the new state
   // Making sure its an integer
-  async setCurrentUserId() {
+    async setCurrentUserId() {
       const userId = await AsyncStorage.getItem("whatsthat_user_id");
       this.setState({ currentUserId: parseInt(userId) });
       console.log("Current user ID:" + this.state.currentUserId);
     }
+
+    async getImage() {
+      fetch("http://localhost:3333/api/1.0.0/user/"+ this.state.currentUserId + "/photo", {
+          method: "GET",
+          headers: {
+              'Content-Type': 'media/png',
+              "X-Authorization": await AsyncStorage.getItem("whatsthat_session_token")
+          }
+      })
+      .then((res) => {
+          return res.blob()
+      })
+      .then((resBlob) => {
+          let data = URL.createObjectURL(resBlob);
+
+          this.setState({
+              photo: data,
+              isLoading: false
+          })
+      })
+      .catch((err) => {
+          console.log(err)
+      })
+  }
 
     async getData(){
       return fetch("http://localhost:3333/api/1.0.0/user/" + this.state.currentUserId, {
@@ -159,6 +184,7 @@ class ProfileUpdate extends Component {
 
   componentDidMount() {
     this.setCurrentUserId()
+      .then(() => this.getImage())
       .then(() => this.getData())
       .catch((error) => console.log(error));
   }
@@ -174,6 +200,16 @@ class ProfileUpdate extends Component {
         }else{
     return (
       <View>
+        <Image
+          source={{
+            uri: this.state.photo
+          }}
+          style={{
+            width: 120,
+            height: 120
+          }}
+        />
+        <Text style={{position: 'absolute', bottom: 165, right: 140, textAlign: 'center', width: '100%', color: 'white'}}>Click to edit</Text>
         {/* First name input text */}
         <Text>First name:</Text>
         {/* Update firstname state with value from input */}

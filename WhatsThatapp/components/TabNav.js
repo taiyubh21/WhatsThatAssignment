@@ -13,7 +13,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import ContactsScreen from './Contacts';
 import ChatListScreen from './ChatList';
 import UserListScreen from './UserListDisplay';
-import UserProfile from './UserProfileDisplay';
+import CamNav from './CamNav';
 
 const Tab = createBottomTabNavigator();
 
@@ -27,7 +27,7 @@ export default class TabNav extends Component {
           <Tab.Screen name = 'Contacts' component={ContactsScreen} />
           <Tab.Screen name = 'ChatList' component={ChatListScreen} />
           <Tab.Screen name = 'UserList' component={UserListScreen} />
-          <Tab.Screen name = 'UserProfile' component={UserProfile} />
+          <Tab.Screen name = 'User Profile' component={CamNav} />
         </Tab.Navigator>
     );
 

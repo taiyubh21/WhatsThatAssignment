@@ -46,8 +46,12 @@ class ProfileUpdate extends Component {
               "X-Authorization": await AsyncStorage.getItem("whatsthat_session_token")
           }
       })
-      .then((res) => {
-          return res.blob()
+      .then((response) => {
+          if(response.status === 200){
+            return response.blob()
+          }else{
+            throw "Error"
+          }
       })
       .then((resBlob) => {
           let data = URL.createObjectURL(resBlob);
@@ -200,15 +204,17 @@ class ProfileUpdate extends Component {
         }else{
     return (
       <View>
-        <Image
-          source={{
-            uri: this.state.photo
-          }}
-          style={{
-            width: 120,
-            height: 120
-          }}
-        />
+        <TouchableOpacity onPress={() => this.props.navigation.navigate('Camera')}>
+          <Image
+            source={{
+              uri: this.state.photo
+            }}
+            style={{
+              width: 120,
+              height: 120
+            }}
+          />
+        </TouchableOpacity>
         <Text style={{position: 'absolute', bottom: 165, right: 140, textAlign: 'center', width: '100%', color: 'white'}}>Click to edit</Text>
         {/* First name input text */}
         <Text>First name:</Text>

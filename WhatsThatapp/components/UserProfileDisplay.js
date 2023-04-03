@@ -187,10 +187,16 @@ class ProfileUpdate extends Component {
   }
 
   componentDidMount() {
-    this.setCurrentUserId()
+    this.unsubscribe = this.props.navigation.addListener("focus", () => {
+      this.setCurrentUserId()
       .then(() => this.getImage())
       .then(() => this.getData())
       .catch((error) => console.log(error));
+    })
+  }
+
+  componentWillUnmount(){
+    this.unsubscribe();
   }
 
   render() {

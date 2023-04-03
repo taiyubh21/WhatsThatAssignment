@@ -4,7 +4,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export default function CameraSendToServer() {
+export default function CameraSendToServer({navigation}) {
     const [type, setType] = useState(CameraType.back);
     const [permission, requestPermission] = Camera.useCameraPermissions();
     const [camera, setCamera] = useState(null);
@@ -30,7 +30,7 @@ export default function CameraSendToServer() {
         let res = await fetch(data.uri);
         let blob = await res.blob()
 
-        console.log(id);
+        console.log("User ID:" + id);
 
         return fetch("http://localhost:3333/api/1.0.0/user/"+ id + "/photo", {
             method: "POST",

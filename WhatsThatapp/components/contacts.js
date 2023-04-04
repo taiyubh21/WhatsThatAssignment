@@ -16,9 +16,17 @@ class Contacts extends Component {
             // To store users search query
             saveQuery: "",
             getContacts: false,
-            searchCalled: false         
+            searchCalled: false,
+            currentUserId: null         
         }
+        this.setCurrentUserId();
     }
+
+    async setCurrentUserId() {
+        const userId = await AsyncStorage.getItem("whatsthat_user_id");
+        this.setState({ currentUserId: parseInt(userId) });
+        console.log("Current user ID:" + this.state.currentUserId);
+      }
 
     async getData(){
         return fetch("http://localhost:3333/api/1.0.0/contacts", {
@@ -29,7 +37,13 @@ class Contacts extends Component {
             }
           })    
 
-        .then((response) => response.json())
+          .then((response) => {
+            if(response.status === 200){
+                return response.json()
+            }else{
+                throw "Error";
+            }
+        })
         .then((responseJson) => {
             // Updating the contactData state with the retrieved data
             this.setState({
@@ -52,8 +66,13 @@ class Contacts extends Component {
               "X-Authorization": await AsyncStorage.getItem("whatsthat_session_token")
             }
           })    
-
-        .then((response) => response.json())
+          .then((response) => {
+            if(response.status === 200){
+                return response.json()
+            }else{
+                throw "Error";
+            }
+        })
         .then((responseJson) => {
             // Updating the contactData state with the retrieved data
             this.setState({
@@ -68,6 +87,30 @@ class Contacts extends Component {
             console.log(error);
         });
     }
+
+    async deleteContacts(contactuserID){
+        return fetch("http://localhost:3333/api/1.0.0/user/" + contactuserID + "/contact",
+        {
+          method: 'DELETE',
+          headers: {
+            "X-Authorization": await AsyncStorage.getItem("whatsthat_session_token")
+          }
+        })
+        .then((response) => {
+            // If the response is ok  
+            if(response.status === 200){
+                console.log('Contact removed successfully');
+                // Update the contactData state to remove the deleted contact
+                // Filters user_id data matching the contactuserID value and returns a new array with the other contacts
+                const updatedContactData = this.state.contactData.filter(contact => contact.user_id !== contactuserID);
+                this.setState({ contactData: updatedContactData });
+            // Else if its bad then throw an error
+            }else{
+              // Output error on screen for other responses
+              throw "error"
+            }
+          })
+      }
 
     // For refreshing page
     componentDidMount() {
@@ -126,6 +169,13 @@ class Contacts extends Component {
                                 <Text>{item.email}</Text> 
                                 {/* Empty line inbetween account details*/}
                                 <Text>{' '}</Text>
+                                {/* Passes user id into deleteContacts and then calls this.getData() so you can visibly see the contact has deleted */}
+                                <Button
+                                    title="Remove contact"
+                                    onPress={() => {
+                                        this.deleteContacts(item.user_id)
+                                    }}
+                                />
                             </View>
                             )}
                         keyExtractor={(item) => item.user_id}

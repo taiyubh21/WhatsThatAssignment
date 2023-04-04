@@ -74,7 +74,13 @@ class ProfileUpdate extends Component {
             "X-Authorization": await AsyncStorage.getItem("whatsthat_session_token")
           }
         })    
-      .then((response) => response.json())
+        .then((response) => {
+          if(response.status === 200){
+              return response.json()
+          }else{
+              throw "Error";
+          }
+      })
       .then((responseJson) => {
           // Updating each state with their data
           this.setState({

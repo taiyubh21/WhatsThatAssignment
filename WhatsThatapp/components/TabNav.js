@@ -10,7 +10,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 // Importing the two screens needed for the navigation
-import ContactsScreen from './Contacts';
+import ContactsScreen from './contacts';
 import ChatListScreen from './ChatList';
 import UserListScreen from './UserListDisplay';
 import CamNav from './CamNav';

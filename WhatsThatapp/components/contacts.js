@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { FlatList, View, ActivityIndicator, Text, TextInput, Button } from 'react-native';
+import { FlatList, View, ActivityIndicator, Text, TextInput, Button, ScrollView } from 'react-native';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -110,6 +110,34 @@ class Contacts extends Component {
               throw "error"
             }
           })
+          .catch((error) => {
+            console.log(error);
+          });
+      }
+
+      async blockUser(blockuserID){
+        return fetch("http://localhost:3333/api/1.0.0/user/" + blockuserID + "/block",
+        {
+          method: 'POST',
+          headers: {
+            "X-Authorization": await AsyncStorage.getItem("whatsthat_session_token")
+          }
+        })
+        .then((response) => {
+            // If the response is ok  
+            if(response.status === 200){
+                console.log('User blocked successfully');
+                const updatedContactData = this.state.contactData.filter(contact => contact.user_id !== blockuserID);
+                this.setState({ contactData: updatedContactData });
+            // Else if its bad then throw an error
+            }else{
+              // Output error on screen for other responses
+              throw "error"
+            }
+          })
+          .catch((error) => {
+            console.log(error);
+          });
       }
 
     // For refreshing page
@@ -153,8 +181,11 @@ class Contacts extends Component {
                     title="Search"
                     onPress={() => this.searchContacts()}
                 />
+                <View style={{ height: 600 }}>
+                  {/* Nested scroll enabled because the flatlist is inside the scrollview */}
+                  <ScrollView nestedScrollEnabled={true}>
                     <FlatList
-                        data={this.state.contactData}              
+                    data={this.state.contactData}              
                         renderItem= {({item}) => (
                             <View>
                                 {/*<Text>{JSON.stringify(item)}</Text>*/}
@@ -172,14 +203,27 @@ class Contacts extends Component {
                                 {/* Passes user id into deleteContacts and then calls this.getData() so you can visibly see the contact has deleted */}
                                 <Button
                                     title="Remove contact"
-                                    onPress={() => {
-                                        this.deleteContacts(item.user_id)
-                                    }}
+                                    onPress={() => {this.deleteContacts(item.user_id)}}
+                                />
+                                <Button
+                                    title="Block user"
+                                    onPress={() => this.blockUser(item.user_id)}
                                 />
                             </View>
                             )}
                         keyExtractor={(item) => item.user_id}
                     />
+                    </ScrollView>
+                  </View>
+                  <Text>{' '}</Text>
+                  <Button
+                    title="Add users"
+                    onPress={() => this.props.navigation.navigate('UserListDisplay')}
+                  />
+                  <Button
+                    title="View blocked users"
+                    onPress={() => this.props.navigation.navigate('BlockedUsers')}
+                  />
                 </View>
             );
         }

@@ -77,29 +77,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
           })
       }
 
-      async blockUser(blockuserID){
-        return fetch("http://localhost:3333/api/1.0.0/user/" + blockuserID + "/block",
-        {
-          method: 'POST',
-          headers: {
-            "X-Authorization": await AsyncStorage.getItem("whatsthat_session_token")
-          }
-        })
-        .then((response) => {
-            // If the response is ok  
-            if(response.status === 200){
-                console.log('User blocked successfully');
-                // Filters user_id data matching the contactuserID value and returns a new array with the other contacts
-                const updatedUserData = this.state.userListData.filter(user => user.user_id !== blockuserID);
-                this.setState({ userListData: updatedUserData });
-            // Else if its bad then throw an error
-            }else{
-              // Output error on screen for other responses
-              throw "error"
-            }
-          })
-      }
-
     componentDidMount() {
         this.getData();
         this.resetData = this.props.navigation.addListener('focus', () => {
@@ -139,7 +116,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
                     title="Search"
                     onPress={() => this.getData()}
                 />
-                <View style={{ height: 700 }}>
+                <View style={{ height: 630 }}>
                   {/* Nested scroll enabled because the flatlist is inside the scrollview */}
                   <ScrollView nestedScrollEnabled={true}>
                     <FlatList
@@ -161,10 +138,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
                                           title="Add to contacts"
                                           onPress={() => this.addContacts(item.user_id)}
                                       />
-                                      <Button
-                                          title="Block user"
-                                          onPress={() => this.blockUser(item.user_id)}
-                                      />
                                       {/* Empty line inbetween account details*/}
                                       <Text>{' '}</Text>
                                   </View>
@@ -178,6 +151,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
                   />
                   </ScrollView>
                 </View>
+                <Text>{' '}</Text>
+                <Button
+                    title="Go back to contacts"
+                    onPress={() => this.props.navigation.navigate('ContactsScreen')}
+                />
             </View>
         );
     }

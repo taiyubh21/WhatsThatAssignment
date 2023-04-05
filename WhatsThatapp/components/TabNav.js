@@ -9,25 +9,43 @@ import { NavigationContainer } from '@react-navigation/native';
 
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 // Importing the two screens needed for the navigation
-import ContactsScreen from './contacts';
 import ChatListScreen from './ChatList';
-import UserListScreen from './UserListDisplay';
 import CamNav from './CamNav';
+import ContactNav from './ContactsNav';
 
 const Tab = createBottomTabNavigator();
 
 export default class TabNav extends Component {
+
+  componentDidMount(){
+    this.unsubscribe = this.props.navigation.addListener('focus', () => {
+      this.checkLoggedIn();
+    });
+  }
+
+  componentWillUnmount(){
+    this.unsubscribe();
+  }
+
+  checkLoggedIn = async () => {
+    const value = await AsyncStorage.getItem("whatsthat_session_token");
+    if(value == null){
+      this.props.navigation.navigate('Login');
+    }
+  }
+
   render(){
     return(
         // Hide navigation headers on the app
         // Making the contacts page the default initial page shown*
         <Tab.Navigator screenOptions={{headerShown: false}} initialRouteName='Contacts'>
           {/* The screens in the tab navigation*/}
-          <Tab.Screen name = 'Contacts' component={ContactsScreen} />
+          <Tab.Screen name = 'Contacts' component={ContactNav} />
           <Tab.Screen name = 'ChatList' component={ChatListScreen} />
-          <Tab.Screen name = 'UserList' component={UserListScreen} />
-          <Tab.Screen name = 'User Profile' component={CamNav} />
+          <Tab.Screen name = 'User Profile' component={CamNav} />         
         </Tab.Navigator>
     );
 

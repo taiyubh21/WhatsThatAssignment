@@ -12,7 +12,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Importing the two screens needed for the navigation
-import ChatListScreen from './ChatList';
+import ChatNav from './ChatNav';
 import CamNav from './CamNav';
 import ContactNav from './ContactsNav';
 
@@ -44,7 +44,7 @@ export default class TabNav extends Component {
         <Tab.Navigator screenOptions={{headerShown: false}} initialRouteName='Contacts'>
           {/* The screens in the tab navigation*/}
           <Tab.Screen name = 'Contacts' component={ContactNav} />
-          <Tab.Screen name = 'ChatList' component={ChatListScreen} />
+          <Tab.Screen name = 'Chats' component={ChatNav} />
           <Tab.Screen name = 'User Profile' component={CamNav} />         
         </Tab.Navigator>
     );

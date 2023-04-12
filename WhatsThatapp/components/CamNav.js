@@ -14,7 +14,7 @@ export default class CamNav extends Component {
     return(
         <Stack.Navigator screenOptions={{headerShown: false}} initialRouteName='UserProfileDisplay'>
           <Stack.Screen name = 'UserProfileDisplay' component={UserProfileDisplay} />
-          <Stack.Screen name="Camera" component={CameraSendToServer} />
+          <Stack.Screen name='Camera' component={CameraSendToServer} />
         </Stack.Navigator>
     );
 

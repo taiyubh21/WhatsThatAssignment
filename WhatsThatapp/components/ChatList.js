@@ -80,13 +80,13 @@ class Chats extends Component {
         });
       }
 
-        // Converting the millisecond timestamp into a readable date  
+    // Converting the millisecond timestamp into a readable date  
     formatDate(timestamp){
         const date = new Date(timestamp);
         return date.toLocaleDateString('en-gb');
     }
     
-        // Converting the millisecond timestamp into a readable time
+    // Converting the millisecond timestamp into a readable time
     formatTime(timestamp){
         const date = new Date(timestamp);
         return date.toLocaleTimeString('en-GB', {
@@ -101,7 +101,7 @@ class Chats extends Component {
             this.setState({error: "Please make sure the textbox isn't empty"})
             return;
         }
-        this.newChat();
+        this.newChat()
     }
 
     componentDidMount() {
@@ -136,22 +136,40 @@ class Chats extends Component {
                             renderItem= {({item}) => {
                                 if(item.last_message.message == null){
                                     return(
-                                        <View>
-                                            <Text>{item.name}</Text>
-                                            <Text>No new messages</Text>
-                                            <Text>{' '}</Text>
-                                        </View>
+                                        <TouchableOpacity onPress={async () => {
+                                            try {
+                                                await AsyncStorage.setItem('chat_id', item.chat_id);
+                                                this.props.navigation.navigate('ConversationDisplay');
+                                            } catch (error) {
+                                                console.log(error);
+                                            }
+                                        }}>
+                                            <View>
+                                                <Text>{item.name}</Text>
+                                                <Text>No new messages</Text>
+                                                <Text>{' '}</Text>
+                                            </View>
+                                        </TouchableOpacity>
                                     );
                                 }else{
                                     return(
-                                        <View>
-                                            {/*<Text>{JSON.stringify(item)}</Text>*/}
+                                        <TouchableOpacity onPress={async () => {
+                                            try {
+                                                await AsyncStorage.setItem('chat_id', item.chat_id);
+                                                this.props.navigation.navigate('ConversationDisplay');
+                                            } catch (error) {
+                                                console.log(error);
+                                            }
+                                        }}>
+                                            <View>
+                                                {/*<Text>{JSON.stringify(item)}</Text>*/}
 
-                                            <Text>{item.name + '   ' + this.formatDate(item.last_message.timestamp) + ' ' +this.formatTime(item.last_message.timestamp)}</Text> 
-                                            <Text>{item.last_message.author.first_name + ' ' + item.last_message.author.last_name + ':  ' + item.last_message.message}</Text>                  
-                                            {/*Empty line inbetween chat details*/}
-                                            <Text>{' '}</Text>
-                                        </View>
+                                                <Text>{item.name + '   ' + this.formatDate(item.last_message.timestamp) + ' ' +this.formatTime(item.last_message.timestamp)}</Text> 
+                                                <Text>{item.last_message.author.first_name + ' ' + item.last_message.author.last_name + ':  ' + item.last_message.message}</Text>                  
+                                                {/*Empty line inbetween chat details*/}
+                                                <Text>{' '}</Text>
+                                            </View>
+                                        </TouchableOpacity>
                                     );
                                 }
                             }}

@@ -15,8 +15,8 @@ export default class CamNav extends Component {
     return(
         <Stack.Navigator screenOptions={{headerShown: false}} initialRouteName='ContactsScreen'>
           <Stack.Screen name = 'ContactsScreen' component={Contacts} />
-          <Stack.Screen name="UserListDisplay" component={UserListDisplay} />
-          <Stack.Screen name="BlockedUsers" component={BlockedUsers} />
+          <Stack.Screen name='UserListDisplay' component={UserListDisplay} />
+          <Stack.Screen name='BlockedUsers' component={BlockedUsers} />
         </Stack.Navigator>
     );
 

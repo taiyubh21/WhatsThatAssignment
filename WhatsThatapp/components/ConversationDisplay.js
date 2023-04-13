@@ -66,21 +66,36 @@ class ConversationDisplay extends Component {
     // Checks if it is a success and user was created or if there is an error
     .then((response) => {
       if(response.status === 200){
-        return response.json();
-        
+        console.log("Message has been sent")
+        // Empty the message state variable
+        this.setState({ message:"" });
+        // For page refreshing after new chat is created
+        this.getData();
+        console.log(this.state.message);
       }else{
         throw "Error";
       }
     })   
-    .then((rjson) => {
-      console.log(rjson);
-      // For page refreshing after new chat is created
-      this.getData();
-    })
     .catch((error) => {
       console.log(error)
     });
   }
+
+    // Converting the millisecond timestamp into a readable date  
+    formatDate(timestamp){
+        const date = new Date(timestamp);
+        return date.toLocaleDateString('en-gb');
+    }
+    
+    // Converting the millisecond timestamp into a readable time
+    formatTime(timestamp){
+        const date = new Date(timestamp);
+        return date.toLocaleTimeString('en-GB', {
+            hour12: false,
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
 
   componentDidMount() {
     this.unsubscribe = this.props.navigation.addListener("focus", () => {
@@ -106,16 +121,26 @@ class ConversationDisplay extends Component {
       return(
         <View>
           <Text>{this.state.chatData.name}</Text>
+          <Text>{"\n\n\n"}</Text>
           <View style={{ height: 600 }}>
             {/* Nested scroll enabled because the flatlist is inside the scrollview */}
-            <ScrollView nestedScrollEnabled={true} contentContainerStyle={{justifyContent: 'flex-end'}}>
+            <ScrollView 
+              nestedScrollEnabled={true}
+              // Setting a reference to scrollview
+              ref={(scrollView) => {this.scrollView = scrollView;}}
+              // Calling whenever the size changes
+              onContentSizeChange={() => {
+                // Reverses the scrolview, so bottom to top instead of top to bottom
+                // Imediatley scrolls to the bottom of the flatlist
+                this.scrollView.scrollToEnd({ animated: false });
+            }}>
               <FlatList
                 data={this.state.chatData.messages}
                 // For latest messages appearing at the bottom and earlier ones at the top
                 inverted={true}
                 renderItem={({item}) => (
                   <View>
-                    <Text>{item.message}</Text>
+                    <Text>{item.message + '   ' + this.formatDate(item.timestamp) + ' ' +this.formatTime(item.timestamp)}</Text> 
                   </View>
                 )}
                 keyExtractor={(item) => item.message_id}
@@ -123,7 +148,7 @@ class ConversationDisplay extends Component {
             </ScrollView>
           </View>
           <Text>{' '}</Text>
-          <TextInput placeholder = "new message..." onChangeText={message => this.setState({message})} defaultValue={this.state.message}></TextInput>
+          <TextInput placeholder = "new message..." onChangeText={message => this.setState({message})} value={this.state.message}></TextInput>
           <TouchableOpacity onPress={() => {
             if (this.state.message == "") {
               this.setState({error: "Please make sure the textbox isn't empty"})

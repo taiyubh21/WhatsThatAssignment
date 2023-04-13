@@ -72,6 +72,7 @@ class Chats extends Component {
         
         .then((rjson) => {
           console.log(rjson);
+          this.setState({chatname: ""})
           // For page refreshing after new chat is created
           this.getData();
         })
@@ -105,8 +106,14 @@ class Chats extends Component {
     }
 
     componentDidMount() {
-        this.getData();
-    }
+        this.unsubscribe = this.props.navigation.addListener("focus", () => {
+          this.getData()
+        })
+      }
+    
+      componentWillUnmount(){
+        this.unsubscribe();
+      }
     
     render(){
         // If data is still being fetched return a loading spinner
@@ -121,7 +128,7 @@ class Chats extends Component {
             return(
                 <View>
                     <Text>Create new chat</Text>
-                    <TextInput placeholder = "new chat name..." onChangeText={chatname => this.setState({chatname})} defaultValue={this.state.chatname}></TextInput>
+                    <TextInput placeholder = "new chat name..." onChangeText={chatname => this.setState({chatname})} value={this.state.chatname}></TextInput>
                     <TouchableOpacity onPress={() => {
                         this.onPressButton();
                     }}>
@@ -163,7 +170,6 @@ class Chats extends Component {
                                         }}>
                                             <View>
                                                 {/*<Text>{JSON.stringify(item)}</Text>*/}
-
                                                 <Text>{item.name + '   ' + this.formatDate(item.last_message.timestamp) + ' ' +this.formatTime(item.last_message.timestamp)}</Text> 
                                                 <Text>{item.last_message.author.first_name + ' ' + item.last_message.author.last_name + ':  ' + item.last_message.message}</Text>                  
                                                 {/*Empty line inbetween chat details*/}

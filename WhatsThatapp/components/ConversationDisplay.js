@@ -120,7 +120,14 @@ class ConversationDisplay extends Component {
       console.log(this.state.chatData)
       return(
         <View>
+          <Button
+            title="Go back to all conversations"
+            onPress={() => this.props.navigation.navigate('ChatList')}
+          />
+          <TouchableOpacity onPress={() => this.props.navigation.navigate('ChatDetails')}>
           <Text>{this.state.chatData.name}</Text>
+          <Text>Click to view and edit chat details</Text>
+          </TouchableOpacity>
           <Text>{"\n\n\n"}</Text>
           <View style={{ height: 600 }}>
             {/* Nested scroll enabled because the flatlist is inside the scrollview */}
@@ -131,7 +138,7 @@ class ConversationDisplay extends Component {
               // Calling whenever the size changes
               onContentSizeChange={() => {
                 // Reverses the scrolview, so bottom to top instead of top to bottom
-                // Imediatley scrolls to the bottom of the flatlist
+                // immediately scrolls to the bottom of the flatlist
                 this.scrollView.scrollToEnd({ animated: false });
             }}>
               <FlatList
@@ -140,7 +147,9 @@ class ConversationDisplay extends Component {
                 inverted={true}
                 renderItem={({item}) => (
                   <View>
-                    <Text>{item.message + '   ' + this.formatDate(item.timestamp) + ' ' +this.formatTime(item.timestamp)}</Text> 
+                    <Text>{item.author.first_name + ' ' + item.author.last_name}</Text>
+                    <Text>{item.message + '   ' + this.formatDate(item.timestamp) + ' ' +this.formatTime(item.timestamp)}</Text>
+                    <Text>{' '}</Text> 
                   </View>
                 )}
                 keyExtractor={(item) => item.message_id}

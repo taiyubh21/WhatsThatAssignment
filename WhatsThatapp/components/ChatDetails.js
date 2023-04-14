@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
-import { Text, TextInput, View, TouchableOpacity, Button} from 'react-native';
+import { Text, TextInput, View, TouchableOpacity, Button, ActivityIndicator, ScrollView, FlatList} from 'react-native';
 
-// Import to handle email validation
-import * as EmailValidator from 'email-validator';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -12,18 +10,10 @@ class ChatDetails extends Component {
 
     // Initialising state variables
     this.state = {
+      isLoading: true,
+      chatData: [],
       chatname: "",
-      firstname: "",
-      lastname: "",
-      email: "",
-      password: "",
-      // Error message for failed validation
-      error: "",
-      // Checks if submission has happened or not
-      submitted: false,
-      // For holding the ID of current user
-      currentUserId: null,
-      photo: null
+      currentChatId: null
     }
     // Binding to onPressButton function
     this.onPressButton = this.onPressButton.bind(this)
@@ -54,7 +44,7 @@ class ChatDetails extends Component {
     .then((responseJson) => {
         this.setState({
             isLoading: false,
-            chatname: responseJson.name
+            chatData: responseJson
         })
     })
     .catch((error)=> {
@@ -96,6 +86,31 @@ class ChatDetails extends Component {
       this.setState({error: "error"})
       this.setState({submitted: false})
     });
+  }
+
+  async deleteMember(chatuserID){
+    return fetch("http://localhost:3333/api/1.0.0/chat/" + this.state.currentChatId + "/user/" + chatuserID,
+    {
+      method: 'DELETE',
+      headers: {
+        "X-Authorization": await AsyncStorage.getItem("whatsthat_session_token")
+      }
+    })
+    .then((response) => {
+        // If the response is ok  
+        if(response.status === 200){
+            console.log('Member removed successfully');
+            const updatedchatData = this.state.chatData.members.filter(members => members.user_id !== chatuserID);
+            this.setState({chatData: updatedchatData });
+        // Else if its bad then throw an error
+        }else{
+          // Output error on screen for other responses
+          throw "error"
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   }
 
   // For input validation
@@ -142,11 +157,32 @@ class ChatDetails extends Component {
             onPress={() => this.props.navigation.navigate('ConversationDisplay')}
         />
         <Text>Chat name:</Text>
-        <TextInput placeholder = "Chat name..." onChangeText={chatname => this.setState({chatname})} defaultValue={this.state.chatname}></TextInput>
+        <TextInput placeholder = "Chat name..." onChangeText={chatname => this.setState({chatname})} defaultValue={this.state.chatData.name}></TextInput>
         <TouchableOpacity onPress={this.onPressButton}><Text>Update chat name</Text></TouchableOpacity>
         <>
           {this.state.error && <Text>{this.state.error}</Text>}
         </>
+        <Text>{"\n\n"}</Text>
+        <View style={{ height: 550 }}>
+            {/* Nested scroll enabled because the flatlist is inside the scrollview */}
+            <Text>Members in {this.state.chatData.name}</Text>
+            <ScrollView nestedScrollEnabled={true}>
+              <FlatList
+                data={this.state.chatData.members}
+                renderItem={({item}) => (
+                  <View>
+                    <Text>{item.first_name + ' ' + item.last_name}</Text>
+                    <Button
+                      title="Remove member"
+                      onPress={() => {this.deleteMember(item.user_id)}}
+                    />
+                    <Text>{' '}</Text> 
+                  </View>
+                )}
+                keyExtractor={(item) => item.user_id}
+              />
+            </ScrollView>
+          </View>
       </View>
     );
   }

@@ -129,7 +129,7 @@ class ConversationDisplay extends Component {
           <Text>Click to view and edit chat details</Text>
           </TouchableOpacity>
           <Text>{"\n\n\n"}</Text>
-          <View style={{ height: 600 }}>
+          <View style={{ height: 550 }}>
             {/* Nested scroll enabled because the flatlist is inside the scrollview */}
             <ScrollView 
               nestedScrollEnabled={true}
@@ -165,7 +165,8 @@ class ConversationDisplay extends Component {
             }
             this.newMessage()
             .then(() => this.getData())
-            }}>
+            }}
+            >
               <Text>Send</Text>
            </TouchableOpacity>
           </View>

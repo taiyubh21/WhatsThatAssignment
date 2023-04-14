@@ -116,14 +116,6 @@ class Chats extends Component {
       }
     
     render(){
-        // If data is still being fetched return a loading spinner
-        if(this.state.isLoading){
-            return(
-                <View>
-                    <ActivityIndicator/>
-                </View>
-            );
-        }else{
             console.log(this.state.chatData);
             return(
                 <View>
@@ -188,6 +180,5 @@ class Chats extends Component {
         }
     
     }
-}
 
 export default Chats

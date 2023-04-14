@@ -17,8 +17,15 @@ class ChatDetails extends Component {
     }
     // Binding to onPressButton function
     this.onPressButton = this.onPressButton.bind(this)
+    this.setCurrentUserId();
     this.setChatId();
   }
+
+  async setCurrentUserId() {
+      const userId = await AsyncStorage.getItem("whatsthat_user_id");
+      this.setState({ currentUserId: parseInt(userId) });
+      console.log("Current user ID:" + this.state.currentUserId);
+    }
 
   async setChatId() {
     const chatID = await AsyncStorage.getItem("chat_id");
@@ -100,8 +107,18 @@ class ChatDetails extends Component {
         // If the response is ok  
         if(response.status === 200){
             console.log('Member removed successfully');
-            const updatedchatData = this.state.chatData.members.filter(members => members.user_id !== chatuserID);
-            this.setState({chatData: updatedchatData });
+            if(this.state.currentUserId == chatuserID){
+              this.props.navigation.navigate('ChatList')
+            };
+            // Filtering the members array by keeping members where the member user_id is not equal to the chatuserID that is being passed in
+            const updatedMembers = this.state.chatData.members.filter(member => member.user_id !== chatuserID);
+            // Using the spread operator to open up chatData and then updating the members array with updatedMembers
+            const updatedChatData = {
+              ...this.state.chatData,
+              members: updatedMembers
+            };
+            // Updating the original state
+            this.setState({ chatData: updatedChatData });         
         // Else if its bad then throw an error
         }else{
           // Output error on screen for other responses

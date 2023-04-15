@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { FlatList, View, ActivityIndicator, Text, TextInput, Button, ScrollView, TouchableOpacity } from 'react-native';
+import { FlatList, View, ActivityIndicator, Text, TextInput, Button, ScrollView, TouchableOpacity, Modal } from 'react-native';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -11,10 +11,20 @@ class ConversationDisplay extends Component {
     this.state = {
       isLoading: true,
       chatData: [],
+      currentUserId: null,
       currentChatId: null,
-      message: ""
+      message: "",
+      modalVisible: false,
+      selectedMessage: ""
     }
+    this.setCurrentUserId();
     this.setChatId();
+  }
+
+  async setCurrentUserId() {
+      const userId = await AsyncStorage.getItem("whatsthat_user_id");
+      this.setState({ currentUserId: parseInt(userId) });
+      console.log("Current user ID:" + this.state.currentUserId);
   }
 
   async setChatId() {
@@ -22,6 +32,10 @@ class ConversationDisplay extends Component {
     this.setState({ currentChatId: parseInt(chatID) });
     console.log("Current chat ID:" + this.state.currentChatId);
   }
+
+  handleMessage = (message) => {
+    this.setState({ modalVisible: true, selectedMessage: message });
+  };
   
   async getData(){
     return fetch("http://localhost:3333/api/1.0.0/chat/" + this.state.currentChatId, {
@@ -145,13 +159,28 @@ class ConversationDisplay extends Component {
                 data={this.state.chatData.messages}
                 // For latest messages appearing at the bottom and earlier ones at the top
                 inverted={true}
-                renderItem={({item}) => (
-                  <View>
-                    <Text>{item.author.first_name + ' ' + item.author.last_name}</Text>
-                    <Text>{item.message + '   ' + this.formatDate(item.timestamp) + ' ' +this.formatTime(item.timestamp)}</Text>
-                    <Text>{' '}</Text> 
-                  </View>
-                )}
+                renderItem={({item}) => {
+                  if(this.state.currentUserId == item.author.user_id){
+                    return(
+                      // Passing the current message in the flatlist into the handleMessage function
+                      <TouchableOpacity onPress={() => this.handleMessage(item.message)}>
+                        <View style={{ alignSelf: 'flex-end' }}>
+                          <Text>{item.author.first_name + ' ' + item.author.last_name}</Text>
+                          <Text>{item.message + '   ' + this.formatDate(item.timestamp) + ' ' +this.formatTime(item.timestamp)}</Text>
+                          <Text>{' '}</Text> 
+                        </View>
+                      </TouchableOpacity>
+                    );
+                  }else{
+                    return(
+                      <View>
+                        <Text>{item.author.first_name + ' ' + item.author.last_name}</Text>
+                        <Text>{item.message + '   ' + this.formatDate(item.timestamp) + ' ' +this.formatTime(item.timestamp)}</Text>
+                        <Text>{' '}</Text> 
+                      </View>
+                    );
+                  }
+                }}
                 keyExtractor={(item) => item.message_id}
               />
             </ScrollView>
@@ -169,6 +198,15 @@ class ConversationDisplay extends Component {
             >
               <Text>Send</Text>
            </TouchableOpacity>
+           <Modal visible={this.state.modalVisible}>
+            <View>
+              {/* Using handlePress(message) so when a text is clicked on it passes that in as the parameter into the text box*/}            
+              <Text>{this.state.selectedMessage}</Text>
+              <Button title="Update"/>
+              <Button title="Delete"/>
+              <Button title="Cancel" onPress={() => this.setState({ modalVisible: false})} />
+            </View>
+          </Modal>
           </View>
       );
     }

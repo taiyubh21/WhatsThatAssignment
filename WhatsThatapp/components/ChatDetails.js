@@ -25,7 +25,7 @@ class ChatDetails extends Component {
       const userId = await AsyncStorage.getItem("whatsthat_user_id");
       this.setState({ currentUserId: parseInt(userId) });
       console.log("Current user ID:" + this.state.currentUserId);
-    }
+  }
 
   async setChatId() {
     const chatID = await AsyncStorage.getItem("chat_id");

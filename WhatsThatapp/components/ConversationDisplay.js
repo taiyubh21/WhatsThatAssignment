@@ -15,10 +15,16 @@ class ConversationDisplay extends Component {
       currentChatId: null,
       message: "",
       modalVisible: false,
-      selectedMessage: ""
+      selectedMessage: "",
+      // Error message for failed validation
+      error: "",
+      // Checks if submission has happened or not
+      submitted: false,
+      sendMessage: "",
     }
     this.setCurrentUserId();
     this.setChatId();
+    this.onPressButton = this.onPressButton.bind(this)
   }
 
   async setCurrentUserId() {
@@ -34,7 +40,10 @@ class ConversationDisplay extends Component {
   }
 
   handleMessage = (message) => {
-    this.setState({ modalVisible: true, selectedMessage: message });
+    this.setState({ 
+      modalVisible: true, 
+      selectedMessage: message,
+    });
   };
   
   async getData(){
@@ -94,6 +103,57 @@ class ConversationDisplay extends Component {
       console.log(error)
     });
   }
+
+  async updateMessage(messageID){
+
+    let to_send = {};
+
+    if(this.state.sendMessage != ""){
+        to_send['message'] = this.state.sendMessage
+    }
+    
+    console.log('Request payload:', JSON.stringify(to_send));
+    return fetch("http://localhost:3333/api/1.0.0/chat/" + this.state.currentChatId + "/message/" + messageID,
+    {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json',
+      "X-Authorization": await AsyncStorage.getItem("whatsthat_session_token") 
+    },
+      // Creating JSON with the user data
+      body: JSON.stringify(to_send)
+    })
+    // Handles API response
+    // Checks if it is a success or if there is an error
+    .then((response) => {
+      console.log(response); // log the entire response object
+      if(response.status === 200){
+        console.log("Message has been updated");
+      }else if(response.status === 400){
+        throw "Please try again"
+      }
+    })
+    .catch((error) => {
+      console.log(error)
+      this.setState({error: "error"})
+      this.setState({submitted: false})
+    });
+  }
+
+    // For input validation
+    onPressButton(messageID){
+      this.setState({submitted: true})
+      this.setState({error: ""})
+  
+      // If inputs aren't valid according to the validation error message will return
+      // If inputs are null no need for validation
+      // Checks with the email validator if the email is valid
+      if(this.state.selectedMessage == ""){
+          this.setState({error: "Message cannot be empty"})
+          return;
+      }
+  
+      this.updateMessage(messageID)
+    }
 
     // Converting the millisecond timestamp into a readable date  
     formatDate(timestamp){
@@ -162,8 +222,8 @@ class ConversationDisplay extends Component {
                 renderItem={({item}) => {
                   if(this.state.currentUserId == item.author.user_id){
                     return(
-                      // Passing the current message in the flatlist into the handleMessage function
-                      <TouchableOpacity onPress={() => this.handleMessage(item.message)}>
+                      // Passing the current item in the flatlist into the handleMessage function
+                      <TouchableOpacity onPress={() => this.handleMessage(item)}>
                         <View style={{ alignSelf: 'flex-end' }}>
                           <Text>{item.author.first_name + ' ' + item.author.last_name}</Text>
                           <Text>{item.message + '   ' + this.formatDate(item.timestamp) + ' ' +this.formatTime(item.timestamp)}</Text>
@@ -200,9 +260,16 @@ class ConversationDisplay extends Component {
            </TouchableOpacity>
            <Modal visible={this.state.modalVisible}>
             <View>
-              {/* Using handlePress(message) so when a text is clicked on it passes that in as the parameter into the text box*/}            
-              <Text>{this.state.selectedMessage}</Text>
-              <Button title="Update"/>
+              {/* Using handlePress(message) so when a text is clicked on it passes that specific message in as the parameter into the text input*/}      
+              {console.log("Selected Message ID:", this.state.selectedMessage.message_id)}
+              <TextInput placeholder = "Message..." onChangeText={sendMessage => this.setState({sendMessage})} defaultValue={this.state.selectedMessage.message}></TextInput>      
+              <Button title="Update" onPress={() => {
+                this.updateMessage(this.state.selectedMessage.message_id)
+                  .then(() => {
+                    this.setState({ modalVisible: false, selectedMessageId: null });
+                    this.getData();
+                  })
+                }}/>
               <Button title="Delete"/>
               <Button title="Cancel" onPress={() => this.setState({ modalVisible: false})} />
             </View>

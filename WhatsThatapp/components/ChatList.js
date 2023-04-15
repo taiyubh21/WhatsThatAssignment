@@ -121,6 +121,10 @@ class Chats extends Component {
                 <View>
                     <Text>Create new chat</Text>
                     <TextInput placeholder = "new chat name..." onChangeText={chatname => this.setState({chatname})} value={this.state.chatname}></TextInput>
+                    {/* Output error if there is an error */}
+                    <>
+                        {this.state.error && <Text>{this.state.error}</Text>}
+                    </>
                     <TouchableOpacity onPress={() => {
                         this.onPressButton();
                     }}>

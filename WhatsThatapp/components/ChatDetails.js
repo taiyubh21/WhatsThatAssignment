@@ -13,7 +13,11 @@ class ChatDetails extends Component {
       isLoading: true,
       chatData: [],
       chatname: "",
-      currentChatId: null
+      currentChatId: null,
+      // Error message for failed validation
+      error: "",
+      // Checks if submission has happened or not
+      submitted: false
     }
     // Binding to onPressButton function
     this.onPressButton = this.onPressButton.bind(this)
@@ -175,10 +179,11 @@ class ChatDetails extends Component {
         />
         <Text>Chat name:</Text>
         <TextInput placeholder = "Chat name..." onChangeText={chatname => this.setState({chatname})} defaultValue={this.state.chatData.name}></TextInput>
-        <TouchableOpacity onPress={this.onPressButton}><Text>Update chat name</Text></TouchableOpacity>
+        {/* Output error if there is an error */}
         <>
           {this.state.error && <Text>{this.state.error}</Text>}
         </>
+        <TouchableOpacity onPress={this.onPressButton}><Text>Update chat name</Text></TouchableOpacity>
         <Text>{"\n\n"}</Text>
         <View style={{ height: 550 }}>
             {/* Nested scroll enabled because the flatlist is inside the scrollview */}

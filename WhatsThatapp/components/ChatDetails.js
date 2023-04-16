@@ -72,7 +72,7 @@ class ChatDetails extends Component {
         to_send['name'] = this.state.chatname
     }
     
-    console.log('Request payload:', JSON.stringify(to_send));
+    console.log(JSON.stringify(to_send));
     return fetch("http://localhost:3333/api/1.0.0/chat/" + this.state.currentChatId,
     {
       method: 'PATCH',

@@ -116,7 +116,7 @@ class ProfileUpdate extends Component {
         to_send['password'] = this.state.password
     }
     
-    console.log('Request payload:', JSON.stringify(to_send));
+    console.log(JSON.stringify(to_send));
     return fetch("http://localhost:3333/api/1.0.0/user/" + this.state.currentUserId,
     {
       method: 'PATCH',

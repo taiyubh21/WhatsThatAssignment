@@ -112,7 +112,7 @@ class ConversationDisplay extends Component {
         to_send['message'] = this.state.sendMessage
     }
     
-    console.log('Request payload:', JSON.stringify(to_send));
+    console.log(JSON.stringify(to_send));
     return fetch("http://localhost:3333/api/1.0.0/chat/" + this.state.currentChatId + "/message/" + messageID,
     {
       method: 'PATCH',
@@ -128,6 +128,9 @@ class ConversationDisplay extends Component {
       console.log(response); // log the entire response object
       if(response.status === 200){
         console.log("Message has been updated");
+        // Reseting state for when the modal is used again
+        this.setState({ modalVisible: false, selectedMessageId: null });
+        this.getData();
       }else if(response.status === 400){
         throw "Please try again"
       }
@@ -143,16 +146,37 @@ class ConversationDisplay extends Component {
     onPressButton(messageID){
       this.setState({submitted: true})
       this.setState({error: ""})
-  
-      // If inputs aren't valid according to the validation error message will return
-      // If inputs are null no need for validation
-      // Checks with the email validator if the email is valid
-      if(this.state.selectedMessage == ""){
+
+      if(this.state.sendMessage == ""){
           this.setState({error: "Message cannot be empty"})
           return;
       }
-  
       this.updateMessage(messageID)
+    }
+
+    async deleteMessage(messageID){
+      return fetch("http://localhost:3333/api/1.0.0/chat/" + this.state.currentChatId + "/message/" + messageID,
+      {
+        method: 'DELETE',
+        headers: {
+          "X-Authorization": await AsyncStorage.getItem("whatsthat_session_token")
+        }
+      })
+      .then((response) => {
+          // If the response is ok  
+          if(response.status === 200){
+              console.log('Message removed successfully');
+              // Reseting state for when the modal is used again
+              this.setState({ modalVisible: false, selectedMessageId: null });
+              this.getData();
+          }else{
+            // Output error on screen for other responses
+            throw "error"
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     }
 
     // Converting the millisecond timestamp into a readable date  
@@ -260,17 +284,15 @@ class ConversationDisplay extends Component {
            </TouchableOpacity>
            <Modal visible={this.state.modalVisible}>
             <View>
-              {/* Using handlePress(message) so when a text is clicked on it passes that specific message in as the parameter into the text input*/}      
+              {/* Using handlePress(message) so when a message is clicked on it passes that specific message in as the parameter into the text input*/}      
               {console.log("Selected Message ID:", this.state.selectedMessage.message_id)}
-              <TextInput placeholder = "Message..." onChangeText={sendMessage => this.setState({sendMessage})} defaultValue={this.state.selectedMessage.message}></TextInput>      
-              <Button title="Update" onPress={() => {
-                this.updateMessage(this.state.selectedMessage.message_id)
-                  .then(() => {
-                    this.setState({ modalVisible: false, selectedMessageId: null });
-                    this.getData();
-                  })
-                }}/>
-              <Button title="Delete"/>
+              <TextInput placeholder = "Message..." onChangeText={sendMessage => this.setState({sendMessage})} defaultValue={this.state.selectedMessage.message}></TextInput>  
+              {/* Output error if there is an error */}
+              <>
+                {this.state.error && <Text>{this.state.error}</Text>}
+              </>    
+              <Button title="Update" onPress={() => {this.onPressButton(this.state.selectedMessage.message_id);}}/>
+              <Button title="Delete" onPress={() => {this.deleteMessage(this.state.selectedMessage.message_id);}}/>
               <Button title="Cancel" onPress={() => this.setState({ modalVisible: false})} />
             </View>
           </Modal>

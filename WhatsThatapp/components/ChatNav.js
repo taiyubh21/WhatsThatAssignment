@@ -7,6 +7,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import ChatList from './ChatList';
 import ConversationDisplay from './ConversationDisplay';
 import ChatDetails from './ChatDetails';
+import AddtoChat from './AddtoChat';
 
 const Stack = createNativeStackNavigator();
 
@@ -17,6 +18,7 @@ export default class ChatNav extends Component {
           <Stack.Screen name = 'ChatList' component={ChatList} />
           <Stack.Screen name='ConversationDisplay' component={ConversationDisplay} />
           <Stack.Screen name='ChatDetails' component={ChatDetails} />
+          <Stack.Screen name='AddtoChat' component={AddtoChat} />
         </Stack.Navigator>
     );
 

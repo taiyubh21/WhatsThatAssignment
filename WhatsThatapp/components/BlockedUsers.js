@@ -64,10 +64,7 @@ class BlockedUsers extends Component {
             // If the response is ok  
             if(response.status === 200){
                 console.log('Contact unblocked successfully');
-                // Update the contactData state to remove the deleted contact
-                // Filters user_id data matching the contactuserID value and returns a new array with the other contacts
-                const updatedblockedData = this.state.blockedData.filter(block => block.user_id !== blockuserID);
-                this.setState({ blockedData: updatedblockedData });
+                this.getData();
             // Else if its bad then throw an error
             }else{
               // Output error on screen for other responses

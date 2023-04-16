@@ -3,7 +3,7 @@ import { FlatList, View, ActivityIndicator, Text, TextInput, Button, ScrollView 
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-class Contacts extends Component {
+class AddtoChat extends Component {
 
     constructor(props){
         super(props);
@@ -17,15 +17,31 @@ class Contacts extends Component {
             saveQuery: "",
             getContacts: false,
             searchCalled: false,
-            currentUserId: null         
+            currentUserId: null,
+            currentChatId: null,
+            currentMembersId: []         
         }
         this.setCurrentUserId();
+        this.setChatId();
+        this.setMembersUserID();
     }
 
     async setCurrentUserId() {
         const userId = await AsyncStorage.getItem("whatsthat_user_id");
         this.setState({ currentUserId: parseInt(userId) });
         console.log("Current user ID:" + this.state.currentUserId);
+      }
+
+      async setChatId() {
+        const chatID = await AsyncStorage.getItem("chat_id");
+        this.setState({ currentChatId: parseInt(chatID) });
+        console.log("Current chat ID:" + this.state.currentChatId);
+      }
+
+      async setMembersUserID() {
+        const MembersUserID = await AsyncStorage.getItem("membersUserID");
+        this.setState({ currentMembersId: parseInt(memberIDs) });
+        console.log("Current member ID:" + this.state.currentMembersId);
       }
 
     async getData(){
@@ -88,54 +104,6 @@ class Contacts extends Component {
         });
     }
 
-    async deleteContacts(contactuserID){
-        return fetch("http://localhost:3333/api/1.0.0/user/" + contactuserID + "/contact",
-        {
-          method: 'DELETE',
-          headers: {
-            "X-Authorization": await AsyncStorage.getItem("whatsthat_session_token")
-          }
-        })
-        .then((response) => {
-            // If the response is ok  
-            if(response.status === 200){
-                console.log('Contact removed successfully');
-                this.getData();
-            // Else if its bad then throw an error
-            }else{
-              // Output error on screen for other responses
-              throw "error"
-            }
-          })
-          .catch((error) => {
-            console.log(error);
-          });
-      }
-
-      async blockUser(blockuserID){
-        return fetch("http://localhost:3333/api/1.0.0/user/" + blockuserID + "/block",
-        {
-          method: 'POST',
-          headers: {
-            "X-Authorization": await AsyncStorage.getItem("whatsthat_session_token")
-          }
-        })
-        .then((response) => {
-            // If the response is ok  
-            if(response.status === 200){
-                console.log('User blocked successfully');
-                this.getData();
-            // Else if its bad then throw an error
-            }else{
-              // Output error on screen for other responses
-              throw "error"
-            }
-          })
-          .catch((error) => {
-            console.log(error);
-          });
-      }
-
     // For refreshing page
     componentDidMount() {
         this.getData();
@@ -171,6 +139,10 @@ class Contacts extends Component {
             return(
                 
                 <View>
+                <Button
+                    title="Go back to chat details"
+                    onPress={() => this.props.navigation.navigate('ChatDetails')}
+                />
                 <TextInput placeholder = "Search..." onChangeText={saveQuery => this.setState({saveQuery})} defaultValue={this.state.saveQuery}></TextInput>
                 {/* Refreshing list of users when button is pressed */}
                 <Button
@@ -197,29 +169,12 @@ class Contacts extends Component {
                                 {/* Empty line inbetween account details*/}
                                 <Text>{' '}</Text>
                                 {/* Passes user id into deleteContacts and then calls this.getData() so you can visibly see the contact has deleted */}
-                                <Button
-                                    title="Remove contact"
-                                    onPress={() => {this.deleteContacts(item.user_id)}}
-                                />
-                                <Button
-                                    title="Block user"
-                                    onPress={() => this.blockUser(item.user_id)}
-                                />
                             </View>
                             )}
                         keyExtractor={(item) => item.user_id}
                     />
                     </ScrollView>
                   </View>
-                  <Text>{' '}</Text>
-                  <Button
-                    title="Add users"
-                    onPress={() => this.props.navigation.navigate('UserListDisplay')}
-                  />
-                  <Button
-                    title="View blocked users"
-                    onPress={() => this.props.navigation.navigate('BlockedUsers')}
-                  />
                 </View>
             );
         }
@@ -227,4 +182,4 @@ class Contacts extends Component {
     }
 }
 
-export default Contacts
+export default AddtoChat

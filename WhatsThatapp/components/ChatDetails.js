@@ -113,16 +113,8 @@ class ChatDetails extends Component {
             console.log('Member removed successfully');
             if(this.state.currentUserId == chatuserID){
               this.props.navigation.navigate('ChatList')
-            };
-            // Filtering the members array by keeping members where the member user_id is not equal to the chatuserID that is being passed in
-            const updatedMembers = this.state.chatData.members.filter(member => member.user_id !== chatuserID);
-            // Using the spread operator to open up chatData and then updating the members array with updatedMembers
-            const updatedChatData = {
-              ...this.state.chatData,
-              members: updatedMembers
-            };
-            // Updating the original state
-            this.setState({ chatData: updatedChatData });         
+            };        
+            this.getData(); 
         // Else if its bad then throw an error
         }else{
           // Output error on screen for other responses
@@ -184,6 +176,18 @@ class ChatDetails extends Component {
           {this.state.error && <Text>{this.state.error}</Text>}
         </>
         <TouchableOpacity onPress={this.onPressButton}><Text>Update chat name</Text></TouchableOpacity>
+        <TouchableOpacity onPress={async () => {
+          try {
+            for (let i = 0; i < this.state.chatData.members.length; i++) {
+              await AsyncStorage.setItem('membersUserID', this.state.chatData.members[i].user_id);
+            }
+            this.props.navigation.navigate('AddtoChat');
+          } catch (error) {
+            console.log(error);
+          }
+          }}>
+            <Text>Add contacts to chat</Text>
+          </TouchableOpacity>
         <Text>{"\n\n"}</Text>
         <View style={{ height: 550 }}>
             {/* Nested scroll enabled because the flatlist is inside the scrollview */}

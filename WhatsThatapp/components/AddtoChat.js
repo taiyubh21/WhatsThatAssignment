@@ -19,7 +19,7 @@ class AddtoChat extends Component {
             searchCalled: false,
             currentUserId: null,
             currentChatId: null,
-            currentMembersId: []         
+            currentMembers: ""         
         }
         this.setCurrentUserId();
         this.setChatId();
@@ -39,9 +39,9 @@ class AddtoChat extends Component {
       }
 
       async setMembersUserID() {
-        const MembersUserID = await AsyncStorage.getItem("membersUserID");
-        this.setState({ currentMembersId: parseInt(memberIDs) });
-        console.log("Current member ID:" + this.state.currentMembersId);
+        const chatData = JSON.parse(await AsyncStorage.getItem("chatData"));
+        this.setState({ currentMembers: chatData});
+        //console.log("currentMembers:" + JSON.stringify(this.state.currentMembers));
       }
 
     async getData(){
@@ -154,23 +154,31 @@ class AddtoChat extends Component {
                   <ScrollView nestedScrollEnabled={true}>
                     <FlatList
                     data={this.state.contactData}              
-                        renderItem= {({item}) => (
-                            <View>
-                                {/*<Text>{JSON.stringify(item)}</Text>*/}
+                        renderItem= {({item}) => {
+                            // Finding the member with the same user_id as the current item
+                            let currentMemberID = this.state.currentMembers.members.find(member => member.user_id === item.user_id);
+                            if(!currentMemberID){
+                                return(
+                                    <View>
+                                        {/*<Text>{JSON.stringify(item)}</Text>*/}
 
-                                {/* Concatenating first name and last name together */}      
-                                <>
-                                {this.state.getContacts && <Text>{item.first_name + ' ' + item.last_name}</Text> }
-                                </>   
-                                <>
-                                {this.state.searchCalled && <Text>{item.given_name + ' ' + item.family_name}</Text>  }
-                                </>                   
-                                <Text>{item.email}</Text> 
-                                {/* Empty line inbetween account details*/}
-                                <Text>{' '}</Text>
-                                {/* Passes user id into deleteContacts and then calls this.getData() so you can visibly see the contact has deleted */}
-                            </View>
-                            )}
+                                        {/* Concatenating first name and last name together */}      
+                                        <>
+                                        {this.state.getContacts && <Text>{item.first_name + ' ' + item.last_name}</Text> }
+                                        </>   
+                                        <>
+                                        {this.state.searchCalled && <Text>{item.given_name + ' ' + item.family_name}</Text>  }
+                                        </>                   
+                                        <Text>{item.email}</Text> 
+                                        {/* Empty line inbetween account details*/}
+                                        <Text>{' '}</Text>
+                                        {/* Passes user id into deleteContacts and then calls this.getData() so you can visibly see the contact has deleted */}
+                                    </View>
+                                );
+                            }else{
+                                return null;
+                            }
+                        }}
                         keyExtractor={(item) => item.user_id}
                     />
                     </ScrollView>

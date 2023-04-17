@@ -178,9 +178,7 @@ class ChatDetails extends Component {
         <TouchableOpacity onPress={this.onPressButton}><Text>Update chat name</Text></TouchableOpacity>
         <TouchableOpacity onPress={async () => {
           try {
-            for (let i = 0; i < this.state.chatData.members.length; i++) {
-              await AsyncStorage.setItem('membersUserID', this.state.chatData.members[i].user_id);
-            }
+            await AsyncStorage.setItem("chatData", JSON.stringify(this.state.chatData));
             this.props.navigation.navigate('AddtoChat');
           } catch (error) {
             console.log(error);

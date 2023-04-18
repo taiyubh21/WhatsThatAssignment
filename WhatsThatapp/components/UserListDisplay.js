@@ -75,6 +75,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
               throw "error"
             }
           })
+          .catch((error)=> {
+            console.log(error);
+        });
       }
 
     componentDidMount() {

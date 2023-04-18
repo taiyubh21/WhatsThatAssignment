@@ -19,11 +19,10 @@ class AddtoChat extends Component {
             searchCalled: false,
             currentUserId: null,
             currentChatId: null,
-            currentMembers: ""         
+            currentMembers: []         
         }
         this.setCurrentUserId();
         this.setChatId();
-        this.setMembersUserID();
     }
 
     async setCurrentUserId() {
@@ -36,12 +35,6 @@ class AddtoChat extends Component {
         const chatID = await AsyncStorage.getItem("chat_id");
         this.setState({ currentChatId: parseInt(chatID) });
         console.log("Current chat ID:" + this.state.currentChatId);
-      }
-
-      async setMembersUserID() {
-        const chatData = JSON.parse(await AsyncStorage.getItem("chatData"));
-        this.setState({ currentMembers: chatData});
-        //console.log("currentMembers:" + JSON.stringify(this.state.currentMembers));
       }
 
     async getData(){
@@ -74,6 +67,33 @@ class AddtoChat extends Component {
         });
     }
 
+    async getMembers(){
+        return fetch("http://localhost:3333/api/1.0.0/chat/" + this.state.currentChatId, {
+            method: "GET",
+            headers: {
+              'Content-Type': 'application/json',
+              "X-Authorization": await AsyncStorage.getItem("whatsthat_session_token")
+            }
+          })    
+          .then((response) => {
+            if(response.status === 200){
+                return response.json()
+            }else{
+                throw "Error";
+            }
+        })
+        .then((responseJson) => {
+            this.setState({
+                isLoading: false,
+                currentMembers: responseJson
+            })
+            console.log(this.state.currentMembers)
+        })
+        .catch((error)=> {
+            console.log(error);
+        });
+      }
+
     async searchContacts(){
         return fetch("http://localhost:3333/api/1.0.0/search?q="+ this.state.saveQuery + "&search_in=contacts", {
             method: "GET",
@@ -104,10 +124,41 @@ class AddtoChat extends Component {
         });
     }
 
+    
+
+    async addMember(userID){
+        return fetch("http://localhost:3333/api/1.0.0/chat/" + this.state.currentChatId + "/user/" + userID,
+        {
+          method: 'POST',
+          headers: {
+            "X-Authorization": await AsyncStorage.getItem("whatsthat_session_token")
+          }
+        })
+        .then(async(response) => {
+            // If the response is ok  
+            if(response.status === 200){
+                console.log('Contact has been added to chat successfully');
+                this.getMembers();
+                this.getData();
+            // Else if its bad then throw an error
+            }else{
+              // Output error on screen for other responses
+              throw "error"
+            }
+          })
+          .catch((error)=> {
+            console.log(error);
+        });
+      }
+
+
     // For refreshing page
     componentDidMount() {
-        this.getData();
-        this.searchContacts();
+        this.setChatId()
+        .then(() => this.getMembers())
+        .then(() => this.getData())
+        .then(() => this.searchContacts())
+        .catch((error) => console.log(error));
         this.resetData = this.props.navigation.addListener('focus', () => {
           // Reset states back to how they were
           this.setState({
@@ -116,8 +167,11 @@ class AddtoChat extends Component {
             saveQuery: ""
           }, () => {
             // Call getData after resetting the state
-            this.getData();
-            this.searchContacts();
+            this.setChatId()
+            .then(() => this.getMembers())
+            .then(() => this.getData())
+            .then(() => this.searchContacts())
+            .catch((error) => console.log(error));
           });
         });
       }
@@ -136,6 +190,7 @@ class AddtoChat extends Component {
             );
         }else{
             console.log(this.state.contactData);
+            console.log(this.state.currentMembers.members);
             return(
                 
                 <View>
@@ -170,9 +225,12 @@ class AddtoChat extends Component {
                                         {this.state.searchCalled && <Text>{item.given_name + ' ' + item.family_name}</Text>  }
                                         </>                   
                                         <Text>{item.email}</Text> 
+                                        <Button
+                                          title="Add contact to chat"
+                                          onPress={() => this.addMember(item.user_id)}
+                                        />
                                         {/* Empty line inbetween account details*/}
                                         <Text>{' '}</Text>
-                                        {/* Passes user id into deleteContacts and then calls this.getData() so you can visibly see the contact has deleted */}
                                     </View>
                                 );
                             }else{
@@ -191,3 +249,4 @@ class AddtoChat extends Component {
 }
 
 export default AddtoChat
+

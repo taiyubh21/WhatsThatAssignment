@@ -37,31 +37,41 @@ class ChatDetails extends Component {
     console.log("Current chat ID:" + this.state.currentChatId);
   }
   
-  async getData(){
+  async getData() {
+    // Checking if the currentChatID is null before making the API call
+    if (!this.state.currentChatId) {
+      this.setState({
+        isLoading: false,
+        chatData: []
+      });
+      return;
+    }
+  
     return fetch("http://localhost:3333/api/1.0.0/chat/" + this.state.currentChatId, {
-        method: "GET",
-        headers: {
-          'Content-Type': 'application/json',
-          "X-Authorization": await AsyncStorage.getItem("whatsthat_session_token")
-        }
-      })    
-      .then((response) => {
-        if(response.status === 200){
-            return response.json()
-        }else{
-            throw "Error";
-        }
+      method: "GET",
+      headers: {
+        'Content-Type': 'application/json',
+        "X-Authorization": await AsyncStorage.getItem("whatsthat_session_token")
+      }
+    })    
+    .then((response) => {
+      if(response.status === 200){
+          return response.json()
+      }else{
+          throw "Error";
+      }
     })
     .then((responseJson) => {
-        this.setState({
-            isLoading: false,
-            chatData: responseJson
-        })
+      this.setState({
+          isLoading: false,
+          chatData: responseJson
+      })
     })
     .catch((error)=> {
-        console.log(error);
+      console.log(error);
     });
   }
+  
 
   //Updating user - interacting with the API
   async updateChat(){
@@ -112,7 +122,9 @@ class ChatDetails extends Component {
         if(response.status === 200){
             console.log('Member removed successfully');
             if(this.state.currentUserId == chatuserID){
+              this.setState({currentChatId: null})
               this.props.navigation.navigate('ChatList')
+
             };        
             this.getData(); 
         // Else if its bad then throw an error
@@ -176,16 +188,10 @@ class ChatDetails extends Component {
           {this.state.error && <Text>{this.state.error}</Text>}
         </>
         <TouchableOpacity onPress={this.onPressButton}><Text>Update chat name</Text></TouchableOpacity>
-        <TouchableOpacity onPress={async () => {
-          try {
-            await AsyncStorage.setItem("chatData", JSON.stringify(this.state.chatData));
-            this.props.navigation.navigate('AddtoChat');
-          } catch (error) {
-            console.log(error);
-          }
-          }}>
-            <Text>Add contacts to chat</Text>
-          </TouchableOpacity>
+        <Button
+          title="Add contacts to chat"
+          onPress={() => this.props.navigation.navigate('AddtoChat')}
+        />
         <Text>{"\n\n"}</Text>
         <View style={{ height: 550 }}>
             {/* Nested scroll enabled because the flatlist is inside the scrollview */}

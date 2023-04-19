@@ -58,8 +58,8 @@ class Signup extends Component {
     })
     .catch((error) => {
       console.log(error)
-      this.setState({error: "error"})
-      this.setState({submitted: false})
+      this.setState({"error": error})
+      this.setState({"submitted": false})
     });
   }
 

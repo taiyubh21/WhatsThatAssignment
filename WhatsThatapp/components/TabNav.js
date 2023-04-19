@@ -15,6 +15,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import ChatNav from './ChatNav';
 import CamNav from './CamNav';
 import ContactNav from './ContactsNav';
+import Logout from './Logout';
 
 const Tab = createBottomTabNavigator();
 
@@ -45,7 +46,8 @@ export default class TabNav extends Component {
           {/* The screens in the tab navigation*/}
           <Tab.Screen name = 'Contacts' component={ContactNav} />
           <Tab.Screen name = 'Chats' component={ChatNav} />
-          <Tab.Screen name = 'User Profile' component={CamNav} />         
+          <Tab.Screen name = 'User Profile' component={CamNav} />
+          <Tab.Screen name = 'Logout' component={Logout} />          
         </Tab.Navigator>
     );
 

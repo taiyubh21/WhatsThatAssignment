@@ -46,7 +46,6 @@ class Login extends Component {
         throw "error"
       }
     })
-
     // If successful response then store user ID and session token in async storage
     .then(async (rJson) => {
       console.log(rJson)
@@ -61,7 +60,12 @@ class Login extends Component {
       }catch{
         throw "Something went wrong"
       }
-  })
+    })
+    .catch((error) => {
+      console.log(error)
+      this.setState({"error": error})
+      this.setState({"submitted": false})
+    });
   }
 
   // For input validation
@@ -95,6 +99,19 @@ class Login extends Component {
         this.userLogin()
   }
 
+  componentDidMount(){
+    this.unsubscribe = this.props.navigation.addListener('focus', () => {
+      this.setState({
+        email: "",
+        password: ""
+      })
+    });
+  }
+
+  componentWillUnmount(){
+    this.unsubscribe();
+  }
+
   render() {
     return (
       <View>
@@ -102,7 +119,7 @@ class Login extends Component {
         <Text>Email:</Text>
         {/* Update email state with value from input */}
         {/* Set default value to the current email state */}
-        <TextInput placeholder = "email..." onChangeText={email => this.setState({email})} defaultValue={this.state.email}></TextInput>
+        <TextInput placeholder = "email..." onChangeText={email => this.setState({email})} value={this.state.email}></TextInput>
         {/* If submitted and email input is empty then display error message */}
         <>
         {this.state.submitted && !this.state.email && <Text>*Email is required</Text>}
@@ -112,7 +129,7 @@ class Login extends Component {
         {/* Update password state with value from input */}
         {/* Set default value to the current password state */}
         {/* Secure text entry to hide password text */}
-        <TextInput placeholder = "password..." onChangeText={password => this.setState({password})} defaultValue={this.state.password} secureTextEntry={true}></TextInput>
+        <TextInput placeholder = "password..." onChangeText={password => this.setState({password})} value={this.state.password} secureTextEntry={true}></TextInput>
         {/* If submitted and password input is empty then display error message */}
         <>
         {this.state.submitted && !this.state.password && <Text>*Password is required</Text>}

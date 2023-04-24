@@ -19,6 +19,16 @@ class Chats extends Component {
         this.onPressButton = this.onPressButton.bind(this)
     }
 
+    componentDidMount() {
+        this.unsubscribe = this.props.navigation.addListener("focus", () => {
+          this.getData()
+        })
+      }
+    
+      componentWillUnmount(){
+        this.unsubscribe();
+      }
+
     async getData(){
         return fetch("http://localhost:3333/api/1.0.0/chat", {
             method: "GET",
@@ -104,16 +114,6 @@ class Chats extends Component {
         }
         this.newChat()
     }
-
-    componentDidMount() {
-        this.unsubscribe = this.props.navigation.addListener("focus", () => {
-          this.getData()
-        })
-      }
-    
-      componentWillUnmount(){
-        this.unsubscribe();
-      }
     
     render(){
             console.log(this.state.chatData);

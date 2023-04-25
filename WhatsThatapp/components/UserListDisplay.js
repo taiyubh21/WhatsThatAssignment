@@ -16,7 +16,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
             // For holding the ID of current user
             currentUserId: null,
             // To store users search query
-            saveQuery: ""
+            saveQuery: "",
+            limit: 8,
+            offset: 0
         };
         this.setCurrentUserId();
     }
@@ -29,9 +31,22 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
         this.setState({ currentUserId: parseInt(userId) });
       }
 
+    // setLimit(){
+    //   this.setState({limit: 8, offset: 0}, () => {
+    //     this.getData();
+    //   });
+    // }
+  
+    setOffset(newoffset){
+      this.setState({offset: newoffset}, () => {
+        this.getData();
+      })
+    }      
+
     async getData(){
+      console.log("HTTP Request:", "http://localhost:3333/api/1.0.0/search?q=" + this.state.saveQuery + "&limit=" + this.state.limit + "&offset=" + this.state.offset);
         // Changing the API link to include the search parameter state
-        return fetch("http://localhost:3333/api/1.0.0/search?q=" + this.state.saveQuery, {
+        return fetch("http://localhost:3333/api/1.0.0/search?q=" + this.state.saveQuery + "&limit=" + this.state.limit + "&offset=" + this.state.offset, {
             method: "GET",
             headers: {
               'Content-Type': 'application/json',
@@ -151,6 +166,19 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
                               }
                       }}
                       keyExtractor={(item) => item.user_id}
+                      // Buttons once user has scrolled down to the end for previous and next page
+                      ListFooterComponent={
+                        <View>
+                          <Button
+                            title="Previous page"
+                            onPress={() => this.setOffset(this.state.offset - this.state.limit)}
+                          />
+                          <Button
+                            title="Next page"
+                            onPress={() => this.setOffset(this.state.offset + this.state.limit)}
+                          />
+                        </View>
+                      }
                   />
                   </ScrollView>
                 </View>

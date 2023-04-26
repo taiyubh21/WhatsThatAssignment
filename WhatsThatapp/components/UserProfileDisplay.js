@@ -197,6 +197,7 @@ class ProfileUpdate extends Component {
       this.setCurrentUserId()
       .then(() => this.getImage())
       .then(() => this.getData())
+      .then(() => this.setState({password: ""}))
       .catch((error) => console.log(error));
     })
   }
@@ -248,7 +249,7 @@ class ProfileUpdate extends Component {
         {/* Update password state with value from input */}
         {/* Set default value to the current password state */}
         {/* Secure text entry to hide password text */}
-        <TextInput placeholder = "password..." onChangeText={password => this.setState({password})} defaultValue={this.state.password} secureTextEntry={true}></TextInput>
+        <TextInput placeholder = "password..." onChangeText={password => this.setState({password})} value={this.state.password} secureTextEntry={true}></TextInput>
         {/* Sign up button */}
         <TouchableOpacity onPress={this.onPressButton}><Text>Update profile</Text></TouchableOpacity>
         {/* Output error if there is an error */}

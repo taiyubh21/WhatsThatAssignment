@@ -134,6 +134,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
                     title="Search"
                     onPress={() => this.getData()}
                 />
+                <Text>{' '}</Text>
                 <View style={{ height: 630 }}>
                   {/* Nested scroll enabled because the flatlist is inside the scrollview */}
                   <ScrollView nestedScrollEnabled={true}>
@@ -146,8 +147,19 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
                           console.log("current user id:", this.state.currentUserId);
                           // If the user in the data has the same ID as the current user logged in then
                           // don't output their account
-                          if(item.user_id !== this.state.currentUserId){
+                          if(item.user_id == this.state.currentUserId){
                               return(
+                                  <View>
+                                      {/* Concatenating first name and last name together */}                        
+                                      <Text>{item.given_name + ' ' + item.family_name + "   (You)"}</Text> 
+                                      <Text>{item.email}</Text> 
+                                      {/* Empty line inbetween account details*/}
+                                      <Text>{' '}</Text>
+                                  </View>
+                                  );
+                              // If the user is the current user logged in return nothing
+                              } else{
+                                return(
                                   <View>
                                       {/* Concatenating first name and last name together */}                        
                                       <Text>{item.given_name + ' ' + item.family_name}</Text> 
@@ -160,21 +172,21 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
                                       <Text>{' '}</Text>
                                   </View>
                                   );
-                              // If the user is the current user logged in return nothing
-                              } else{
-                                return null;
                               }
                       }}
                       keyExtractor={(item) => item.user_id}
                       // Buttons once user has scrolled down to the end for previous and next page
                       ListFooterComponent={
                         <View>
+                          {/* If the offset is greater than 0 then the button is unhidden so users can't go back before the data starts  */}
+                          {this.state.offset > 0 && (
+                            <Button
+                              title="Previous Page"
+                              onPress={() => this.setOffset(this.state.offset - this.state.limit)}
+                            />
+                          )}
                           <Button
-                            title="Previous page"
-                            onPress={() => this.setOffset(this.state.offset - this.state.limit)}
-                          />
-                          <Button
-                            title="Next page"
+                            title="Next Page"
                             onPress={() => this.setOffset(this.state.offset + this.state.limit)}
                           />
                         </View>

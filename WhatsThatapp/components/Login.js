@@ -42,8 +42,9 @@ class Login extends Component {
       // Else if its bad then throw an error
       }else if(response.status === 400){
         // Output error on screen if theres a 400 response
-        this.setState({error: "Retype password and/or email"})
-        throw "error"
+        throw "Retype password and/or email"
+      }else if(response.status === 500){
+        throw "Please try again"
       }
     })
     // If successful response then store user ID and session token in async storage

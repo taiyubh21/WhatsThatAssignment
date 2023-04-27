@@ -17,7 +17,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
             currentUserId: null,
             // To store users search query
             saveQuery: "",
-            limit: 8,
+            limit: 4,
             offset: 0
         };
         this.setCurrentUserId();
@@ -66,6 +66,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
                 isLoading: false,
                 userListData: responseJson
             })
+            {console.log(this.state.userListData.length)}
         })
         .catch((error)=> {
             console.log(error);
@@ -185,10 +186,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
                               onPress={() => this.setOffset(this.state.offset - this.state.limit)}
                             />
                           )}
-                          <Button
-                            title="Next Page"
-                            onPress={() => this.setOffset(this.state.offset + this.state.limit)}
-                          />
+                          {this.state.userListData.length == this.state.limit && (
+                            <Button
+                              title="Next Page"
+                              onPress={() => this.setOffset(this.state.offset + this.state.limit)}
+                            />
+                          )}
                         </View>
                       }
                   />

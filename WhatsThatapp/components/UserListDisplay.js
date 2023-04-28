@@ -18,7 +18,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
             // To store users search query
             saveQuery: "",
             limit: 4,
-            offset: 0
+            offset: 0,
+            newUserListData: []
         };
         this.setCurrentUserId();
     }
@@ -40,8 +41,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
     setOffset(newoffset){
       this.setState({offset: newoffset}, () => {
         this.getData();
+        this.getNextPage();
       })
-    }      
+    } 
 
     async getData(){
       console.log("HTTP Request:", "http://localhost:3333/api/1.0.0/search?q=" + this.state.saveQuery + "&limit=" + this.state.limit + "&offset=" + this.state.offset);
@@ -67,6 +69,40 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
                 userListData: responseJson
             })
             {console.log(this.state.userListData.length)}
+            {console.log(this.state.offset)}
+        })
+        .catch((error)=> {
+            console.log(error);
+        });
+    }
+
+    async getNextPage(){
+      let offset = parseInt(this.state.offset);
+      console.log(offset);
+      console.log("HTTP Request:", "http://localhost:3333/api/1.0.0/search?q=" + this.state.saveQuery + "&limit=" + this.state.limit + "&offset=" + (this.state.offset + this.state.limit));
+        // Changing the API link to include the search parameter state
+        return fetch("http://localhost:3333/api/1.0.0/search?q=" + this.state.saveQuery + "&limit=" + this.state.limit + "&offset=" + (this.state.offset + this.state.limit), {
+            method: "GET",
+            headers: {
+              'Content-Type': 'application/json',
+              "X-Authorization": await AsyncStorage.getItem("whatsthat_session_token")
+            }
+          })    
+          .then((response) => {
+            if(response.status === 200){
+                return response.json()
+            }else{
+                throw "Error";
+            }
+          })
+        .then((responseJson) => {
+            // Updating the newUserListData state with the retrieved data
+            this.setState({
+                isLoading: false,
+                newUserListData: responseJson
+            })
+            {console.log(this.state.newUserListData.length)}
+            {console.log(this.state.offset)}
         })
         .catch((error)=> {
             console.log(error);
@@ -98,6 +134,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
     componentDidMount() {
         this.getData();
+        this.getNextPage();
         this.resetData = this.props.navigation.addListener('focus', () => {
           // Reset states back to how they were
           this.setState({
@@ -107,6 +144,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
           }, () => {
             // Call getData after resetting the state
             this.getData();
+            this.getNextPage();
           });
         });
       }
@@ -132,8 +170,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
                 <TextInput placeholder = "Search..." onChangeText={saveQuery => this.setState({saveQuery})} defaultValue={this.state.saveQuery}></TextInput>
                 {/* Refreshing list of users when button is pressed */}
                 <Button
-                    title="Search"
-                    onPress={() => this.getData()}
+                  title="Search"
+                  onPress={() => {
+                    this.getData();
+                    this.getNextPage();
+                  }}
                 />
                 <Text>{' '}</Text>
                 <View style={{ height: 630 }}>
@@ -179,6 +220,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
                       // Buttons once user has scrolled down to the end for previous and next page
                       ListFooterComponent={
                         <View>
+                        {console.log(this.state.newUserListData)}
+                        {console.log(this.state.offset)}
                           {/* If the offset is greater than 0 then the button is unhidden so users can't go back before the data starts  */}
                           {this.state.offset > 0 && (
                             <Button
@@ -186,7 +229,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
                               onPress={() => this.setOffset(this.state.offset - this.state.limit)}
                             />
                           )}
-                          {this.state.userListData.length == this.state.limit && (
+                          {this.state.newUserListData.length > 0  && (
                             <Button
                               title="Next Page"
                               onPress={() => this.setOffset(this.state.offset + this.state.limit)}

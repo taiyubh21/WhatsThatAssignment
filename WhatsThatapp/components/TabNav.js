@@ -9,6 +9,8 @@ import { NavigationContainer } from '@react-navigation/native';
 
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
+import Ionicons from 'react-native-vector-icons/Ionicons';
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Importing the two screens needed for the navigation
@@ -42,7 +44,28 @@ export default class TabNav extends Component {
     return(
         // Hide navigation headers on the app
         // Making the contacts page the default initial page shown*
-        <Tab.Navigator screenOptions={{headerShown: false}} initialRouteName='Contacts'>
+        <Tab.Navigator
+        initialRouteName='Contacts'
+        screenOptions={({ route }) => ({
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => {
+            let iconName;
+            if (route.name === 'Contacts') {
+              iconName = 'people';
+            } else if (route.name === 'Chats') {
+              iconName = 'chatbubbles';
+            } else if (route.name === 'User Profile') {
+              iconName = 'person';
+            } else if (route.name === 'Logout') {
+              iconName = 'log-out';
+            }
+  
+            return <Ionicons name={iconName} size={size} color={color} />;
+          },
+            tabBarActiveTintColor: '#069139',
+            tabBarInactiveTintColor: 'gray',
+        })}
+      >
           {/* The screens in the tab navigation*/}
           <Tab.Screen name = 'Contacts' component={ContactNav} />
           <Tab.Screen name = 'Chats' component={ChatNav} />

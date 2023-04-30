@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text, TextInput, View,TouchableOpacity, Button, Alert } from 'react-native';
+import { Text, TextInput, View,TouchableOpacity, Button, StyleSheet } from 'react-native';
 
 // Import to handle email validation
 import * as EmailValidator from 'email-validator';
@@ -17,7 +17,12 @@ class Login extends Component {
       // Error message for failed validation
       error: "",
       // Checks if submission has happened or not
-      submitted: false
+      submitted: false,
+      errorTimer: null,
+      emailError: "",
+      passwordError: "",
+      emailTimer: null,
+      passwordTimer: null
     }
     // Binding to onPressButton function
     this.onPressButton = this.onPressButton.bind(this)
@@ -66,6 +71,10 @@ class Login extends Component {
       console.log(error)
       this.setState({"error": error})
       this.setState({"submitted": false})
+      // Error message will disappear after 5 seconds
+      this.setState({errorTimer: setTimeout(() => {
+        this.setState({error: null, errorTimer: null})
+      }, 5000)})
     });
   }
 
@@ -75,9 +84,28 @@ class Login extends Component {
     this.setState({error: ""})
 
     // Checks if all the input fields are filled in
-    if(!(this.state.email && this.state.password)){
+    if(!this.state.email && !this.state.password){
       this.setState({error: "Must enter email and password"})
+      this.setState({errorTimer: setTimeout(() => {
+        this.setState({error: null, errorTimer: null})
+      }, 5000)})
       return;    
+    }
+
+    if (!this.state.email) {
+      this.setState({emailError: "*Email is required"});
+      this.setState({emailTimer: setTimeout(() => {
+        this.setState({emailError: null, emailTimer: null})
+      }, 5000)})
+      return;
+    }
+
+    if (!this.state.password) {
+      this.setState({passwordError: "*Password is required"});
+      this.setState({passwordTimer: setTimeout(() => {
+        this.setState({passwordError: null, passwordTimer: null})
+      }, 5000)})
+      return;
     }
 
     // If inputs aren't valid according to the validation error message will return
@@ -85,6 +113,9 @@ class Login extends Component {
     // Checks with the email validator if the email is valid
     if(!EmailValidator.validate(this.state.email)){
       this.setState({error: "Must enter valid email"})
+      this.setState({errorTimer: setTimeout(() => {
+        this.setState({error: null, errorTimer: null})
+      }, 5000)})
       return;
     }
 
@@ -93,6 +124,9 @@ class Login extends Component {
     // Check if password is valid
     if(!PASSWORD_REGEX.test(this.state.password)){
             this.setState({error: "Password isn't strong enough (One upper, one lower, one special, one number, at least 8 characters long)"})
+            this.setState({errorTimer: setTimeout(() => {
+              this.setState({error: null, errorTimer: null})
+            }, 5000)})
             return;
           }
 
@@ -111,45 +145,130 @@ class Login extends Component {
 
   componentWillUnmount(){
     this.unsubscribe();
+    if(this.state.errorTimer){
+      clearTimeout(this.state.errorTimer) 
+    }
+    if(this.state.passwordTimer){
+      clearTimeout(this.state.passwordTimer) 
+    }
+    if(this.state.emailTimer){
+      clearTimeout(this.state.emailTimer) 
+    }
   }
 
   render() {
     return (
-      <View>
-        {/* Email input text */}
-        <Text>Email:</Text>
-        {/* Update email state with value from input */}
-        {/* Set default value to the current email state */}
-        <TextInput placeholder = "email..." onChangeText={email => this.setState({email})} value={this.state.email}></TextInput>
-        {/* If submitted and email input is empty then display error message */}
-        <>
-        {this.state.submitted && !this.state.email && <Text>*Email is required</Text>}
-        </>
-        {/* Password input text */}
-        <Text>Password:</Text>
-        {/* Update password state with value from input */}
-        {/* Set default value to the current password state */}
-        {/* Secure text entry to hide password text */}
-        <TextInput placeholder = "password..." onChangeText={password => this.setState({password})} value={this.state.password} secureTextEntry={true}></TextInput>
-        {/* If submitted and password input is empty then display error message */}
-        <>
-        {this.state.submitted && !this.state.password && <Text>*Password is required</Text>}
-        </>
-        {/* Login button */}
-        <TouchableOpacity onPress={this.onPressButton}><Text>Login</Text></TouchableOpacity>
-        {/* Output error if there is an error */}
-        <>
-          {this.state.error && <Text>{this.state.error}</Text>}
-        </>
-        {/* If user doesn't have an account navigate to sign up page with button */}
-        <Button
-        title="Don't have an account? Click here to sign up"
-        onPress={() => this.props.navigation.navigate('Signup')}
-        />
+      <View style = {styles.container}>
+        <View style = {styles.logo}>
+          <Text style = {styles.logoText} >Whats</Text>
+          <Text style = {styles.logoText} >That?</Text>
+        </View>
+        <View style = {styles.form}>
+          <Text>{' '}</Text>
+          {/* Update email state with value from input */}
+          {/* Set default value to the current email state */}
+          <TextInput style = {styles.textInput} placeholder = "Email..." onChangeText={email => this.setState({email})} value={this.state.email}></TextInput>
+          {/* If submitted and email input is empty then display error message */}
+          <>
+            {this.state.emailError && <Text style = {styles.errorMessage}>{this.state.emailError}</Text>}
+          </>
+          {/* Update password state with value from input */}
+          {/* Set default value to the current password state */}
+          {/* Secure text entry to hide password text */}
+          <TextInput style = {styles.textInput} placeholder = "Password..." onChangeText={password => this.setState({password})} value={this.state.password} secureTextEntry={true}></TextInput>
+          {/* If submitted and password input is empty then display error message */}
+          <>
+          {this.state.passwordError && <Text style = {styles.errorMessage}>{this.state.passwordError}</Text>}
+          </>
+          {/* Login button */}
+          <TouchableOpacity style = {styles.loginButton} onPress={this.onPressButton}>
+            <Text style={styles.loginText} >Login</Text>
+          </TouchableOpacity>
+          {/* Output error if there is an error */}
+          <Text>{' '}</Text>
+          <>
+            {this.state.error && <Text style = {styles.errorMessage}>{this.state.error}</Text>}
+          </>
+          {/* If user doesn't have an account navigate to sign up page */}
+          <TouchableOpacity style = {styles.signupNav} onPress={() => this.props.navigation.navigate('Signup')}>
+            <Text style = {styles.signupNavText} >Click here to sign up</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     );
   }
 
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#E5E4E2'    
+  },
+  logo: {
+    width: '40%',
+    marginTop: 150,
+    marginBottom: 35,
+    padding: 15,
+    borderWidth: 4,
+    borderColor: '#069139',
+    alignItems: 'center',
+    borderRadius: 20,
+    alignSelf: 'center',
+  },
+  logoText: {
+    fontSize: 26,
+    lineHeight: 25,
+    fontWeight: 'bold',
+    color: '#069139'
+  },
+  form: {
+    alignItems: 'center'
+  },
+  textInput: {
+    width: '45%',
+    height: 40,
+    padding: 10,
+    borderBottomWidth: 1,
+  },
+  loginButton:
+  {
+    width: '40%',
+    borderRadius: 5,
+    height: 35,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 30,
+    borderWidth: 3,
+    borderColor: '#069139',
+    backgroundColor: '#069139'
+  },
+  loginText:
+  {
+    color: 'white', 
+    fontWeight: 'bold', 
+    fontSize: 20
+  },
+  signupNav: 
+  {
+    alignItems: 'center',
+    position: 'absolute',
+    top: 400,
+    left: 0,
+    right: 0,
+  },
+  signupNavText: 
+  {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#0047AB',
+    textDecorationLine: 'underline'
+  },
+  errorMessage:
+  {
+    color: 'red',
+    textAlign: 'center'
+  }
+})
 
 export default Login

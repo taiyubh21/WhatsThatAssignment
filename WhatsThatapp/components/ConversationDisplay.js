@@ -248,7 +248,7 @@ class ConversationDisplay extends Component {
                     return(
                       // Passing the current item in the flatlist into the handleMessage function
                       <TouchableOpacity onPress={() => this.handleMessage(item)}>
-                        <View style={{ alignSelf: 'flex-end' }}>
+                        <View style={{ alignSelf: 'flex-end', width: 200 }}>
                           <Text>{item.author.first_name + ' ' + item.author.last_name}</Text>
                           <Text>{item.message + '   ' + this.formatDate(item.timestamp) + ' ' +this.formatTime(item.timestamp)}</Text>
                           <Text>{' '}</Text> 
@@ -257,7 +257,7 @@ class ConversationDisplay extends Component {
                     );
                   }else{
                     return(
-                      <View>
+                      <View style = {{width: 200}}>
                         <Text>{item.author.first_name + ' ' + item.author.last_name}</Text>
                         <Text>{item.message + '   ' + this.formatDate(item.timestamp) + ' ' +this.formatTime(item.timestamp)}</Text>
                         <Text>{' '}</Text> 

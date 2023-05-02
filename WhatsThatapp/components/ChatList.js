@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { FlatList, View, ActivityIndicator, Text, TextInput, Button, ScrollView, TouchableOpacity } from 'react-native';
+import { FlatList, View, ActivityIndicator, Text, TextInput, Button, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -14,7 +14,8 @@ class Chats extends Component {
             // For array of contact data
             chatData: [],     
             chatname: "",
-            error: ""   
+            error: "",
+            errorTimer: null   
         }
         this.onPressButton = this.onPressButton.bind(this)
     }
@@ -22,11 +23,17 @@ class Chats extends Component {
     componentDidMount() {
         this.unsubscribe = this.props.navigation.addListener("focus", () => {
           this.getData()
+          this.setState({
+            chatname: ""
+          })
         })
       }
     
       componentWillUnmount(){
         this.unsubscribe();
+        if(this.state.errorTimer){
+            clearTimeout(this.state.errorTimer) 
+        }
       }
 
     async getData(){
@@ -110,6 +117,9 @@ class Chats extends Component {
     onPressButton(){
         if(this.state.chatname == ""){
             this.setState({error: "Please make sure the textbox isn't empty"})
+            this.setState({errorTimer: setTimeout(() => {
+                this.setState({error: null, errorTimer: null})
+              }, 5000)})
             return;
         }
         this.newChat()
@@ -118,20 +128,22 @@ class Chats extends Component {
     render(){
             console.log(this.state.chatData);
             return(
-                <View>
-                    <Text>Create new chat</Text>
-                    <TextInput placeholder = "new chat name..." onChangeText={chatname => this.setState({chatname})} value={this.state.chatname}></TextInput>
-                    {/* Output error if there is an error */}
-                    <>
-                        {this.state.error && <Text>{this.state.error}</Text>}
-                    </>
-                    <TouchableOpacity onPress={() => {
-                        this.onPressButton();
-                    }}>
-                        <Text>Create new chat</Text>
-                    </TouchableOpacity>
+                <View style = {styles.container}>
+                    <Text style = {styles.pageName}>Chats</Text>
+                    <View style = {styles.form}>
+                        <TextInput style = {styles.textInput} placeholder = "New chat name..." onChangeText={chatname => this.setState({chatname})} value={this.state.chatname}></TextInput>
+                        {/* Output error if there is an error */}
+                        <>
+                            {this.state.error && <Text>{this.state.error}</Text>}
+                        </>
+                        <TouchableOpacity  style= {styles.createChatButton} onPress={() => {
+                            this.onPressButton();
+                        }}>
+                            <Text style ={styles.createChatText} >Create new chat</Text>
+                        </TouchableOpacity>
+                    </View>
                     <Text>{' '}</Text>
-                    <View style={{ height: 600 }}>
+                    <View style={{ height: 575 }}>
                     {/* Nested scroll enabled because the flatlist is inside the scrollview */}
                     <ScrollView nestedScrollEnabled={true}>
                         <FlatList
@@ -147,14 +159,21 @@ class Chats extends Component {
                                                 console.log(error);
                                             }
                                         }}>
-                                            <View>
-                                                <Text>{item.name}</Text>
-                                                <Text>No new messages</Text>
+                                            <View style={styles.messagesContainer}>
+                                                <View style={styles.nameDateContainer}>
+                                                    <Text style={styles.nameStyle}>{item.name}</Text>
+                                                </View>
+                                                <Text style={styles.messages}>No new messages</Text>
                                                 <Text>{' '}</Text>
                                             </View>
                                         </TouchableOpacity>
                                     );
                                 }else{
+                                    let text = item.last_message.message;
+                                    // If there are more than 15 characters in the last message only print the first 15
+                                    if(text.length > 30){
+                                        text = text.substring(0, 30) + "...";
+                                    }
                                     return(
                                         <TouchableOpacity onPress={async () => {
                                             try {
@@ -164,10 +183,13 @@ class Chats extends Component {
                                                 console.log(error);
                                             }
                                         }}>
-                                            <View>
-                                                {/*<Text>{JSON.stringify(item)}</Text>*/}
-                                                <Text>{item.name + '   ' + this.formatDate(item.last_message.timestamp) + ' ' +this.formatTime(item.last_message.timestamp)}</Text> 
-                                                <Text>{item.last_message.author.first_name + ' ' + item.last_message.author.last_name + ':  ' + item.last_message.message}</Text>                  
+                                            {/*<Text>{JSON.stringify(item)}</Text>*/}
+                                            <View style={styles.messagesContainer}>
+                                                <View style={styles.nameDateContainer}>
+                                                    <Text style={styles.nameStyle}>{item.name}</Text> 
+                                                    <Text style={styles.dateStyle}>{this.formatDate(item.last_message.timestamp) + ' ' + this.formatTime(item.last_message.timestamp)}</Text>
+                                                </View>
+                                                <Text style={styles.messages}>{item.last_message.author.first_name + ' ' + item.last_message.author.last_name + ':  ' + text}</Text>                  
                                                 {/*Empty line inbetween chat details*/}
                                                 <Text>{' '}</Text>
                                             </View>
@@ -184,5 +206,89 @@ class Chats extends Component {
         }
     
     }
+
+const styles = StyleSheet.create({
+    container: 
+    {
+        flex: 1,
+        borderWidth: 3,
+        margin: 5,
+        borderRadius: 15,
+        borderColor: '#069139',
+        backgroundColor: '#E5E4E2'  
+    },
+    pageName:
+    {
+        color: '#069139',
+        fontWeight: 'bold',
+        fontSize: 22,
+        marginTop: 5,
+        marginBottom: 5,
+        marginLeft:15
+    },
+    form:
+    {
+        borderWidth: 3,
+        margin: 15,
+        borderRadius: 15,
+        borderColor: '#069139',
+        padding: 15
+    },
+    textInput: 
+    {
+      width: '60%',
+      height: 40,
+      padding: 10,
+      borderBottomWidth: 1,
+    },
+    createChatButton:
+    {
+      width: '40%',
+      borderRadius: 5,
+      height: 35,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginTop: 10,
+      borderWidth: 3,
+      borderColor: '#069139',
+      backgroundColor: '#069139'
+    },
+    createChatText:
+    {
+      color: 'white', 
+      fontWeight: 'bold', 
+      fontSize: 14
+    },
+    nameStyle:
+    {
+        fontWeight: 'bold',
+        fontSize: 14
+    },
+    dateStyle:
+    {
+        fontWeight: 'bold',
+        fontSize: 14
+    },
+    nameDateContainer:
+    {
+        marginTop: 8,
+        marginLeft: 10,
+        marginRight: 15,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between'
+    },
+    messagesContainer:
+    {
+        borderTopWidth: 1,
+        width: '95%',
+        alignSelf: 'center'
+    },
+    messages:
+    {
+        marginTop:5,
+        marginLeft: 10
+    }
+})
 
 export default Chats

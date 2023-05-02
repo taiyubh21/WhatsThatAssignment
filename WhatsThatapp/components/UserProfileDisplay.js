@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text, TextInput, View, TouchableOpacity, Image} from 'react-native';
+import { Text, TextInput, View, TouchableOpacity, Image, StyleSheet, Modal} from 'react-native';
 
 // Import to handle email validation
 import * as EmailValidator from 'email-validator';
@@ -22,7 +22,10 @@ class ProfileUpdate extends Component {
       submitted: false,
       // For holding the ID of current user
       currentUserId: null,
-      photo: null
+      photo: null,
+      errorTimer: null,
+      modalVisible: false,
+      modalTimer: null
     }
     // Binding to onPressButton function
     this.onPressButton = this.onPressButton.bind(this)
@@ -50,7 +53,7 @@ class ProfileUpdate extends Component {
           if(response.status === 200){
             return response.blob()
           }else{
-            throw "Error"
+            throw "Something went wrong"
           }
       })
       .then((resBlob) => {
@@ -78,7 +81,7 @@ class ProfileUpdate extends Component {
           if(response.status === 200){
               return response.json()
           }else{
-              throw "Error";
+              throw "Something went wrong";
           }
       })
       .then((responseJson) => {
@@ -132,14 +135,25 @@ class ProfileUpdate extends Component {
       console.log(response); // log the entire response object
       if(response.status === 200){
         console.log("User has been updated");
+        this.setState({ modalVisible: true });
+        // Close modal and navigate to login screen after 4 seconds
+        this.setState({modalTimer: setTimeout(() => {
+          this.setState({modalTimer: null, modalVisible: false });
+        }, 4000)})
       }else if(response.status === 400){
         throw "Please try again"
+      }else{
+        throw "Something has gone wrong"
       }
     })
     .catch((error) => {
       console.log(error)
       this.setState({error: "error"})
       this.setState({submitted: false})
+      // Error message will disappear after 5 seconds
+      this.setState({errorTimer: setTimeout(() => {
+        this.setState({error: null, errorTimer: null})
+      }, 5000)})
     });
   }
 
@@ -154,6 +168,9 @@ class ProfileUpdate extends Component {
     if(this.state.email != ""){
       if(!EmailValidator.validate(this.state.email)){
         this.setState({error: "Must enter valid email"})
+        this.setState({errorTimer: setTimeout(() => {
+          this.setState({error: null, errorTimer: null})
+        }, 5000)})
         return;
       }
     }
@@ -165,6 +182,9 @@ class ProfileUpdate extends Component {
     if(this.state.firstname != ""){
       if(!NAME_REGEX.test(this.state.firstname)){
         this.setState({error: "First name must start with capital letter and have no spaces, numbers or symbols"})
+        this.setState({errorTimer: setTimeout(() => {
+          this.setState({error: null, errorTimer: null})
+        }, 5000)})
         return;
       }
   }
@@ -173,6 +193,9 @@ class ProfileUpdate extends Component {
     if(this.state.lastname != ""){
       if(!NAME_REGEX.test(this.state.lastname)){
         this.setState({error: "Last name must start with capital letter and have no spaces, numbers or symbols"})
+        this.setState({errorTimer: setTimeout(() => {
+          this.setState({error: null, errorTimer: null})
+        }, 5000)})
         return;
       }
     }
@@ -184,6 +207,9 @@ class ProfileUpdate extends Component {
     if(this.state.password != ""){
       if(!PASSWORD_REGEX.test(this.state.password)){
         this.setState({error: "Password isn't strong enough (One upper, one lower, one special, one number, at least 8 characters long)"})
+        this.setState({errorTimer: setTimeout(() => {
+          this.setState({error: null, errorTimer: null})
+        }, 5000)})
         return;
       }   
     }
@@ -204,6 +230,12 @@ class ProfileUpdate extends Component {
 
   componentWillUnmount(){
     this.unsubscribe();
+    if(this.state.errorTimer){
+      clearTimeout(this.state.errorTimer) 
+    }
+    if(this.state.modalTimer){
+      clearTimeout(this.state.modalTimer) 
+    }
   }
 
   render() {
@@ -216,51 +248,157 @@ class ProfileUpdate extends Component {
           );
         }else{
     return (
-      <View>
-        <TouchableOpacity onPress={() => this.props.navigation.navigate('Camera')}>
-          <Image
-            source={{
-              uri: this.state.photo
-            }}
-            style={{
-              width: 120,
-              height: 120
-            }}
-          />
+      <View style = {styles.container}>
+        <Text style={styles.pageName}>User Profile</Text>
+        <TouchableOpacity onPress={() => this.props.navigation.navigate('Camera')} style={styles.imgButton}>
+          <View style={{position: 'relative'}}>
+            <Image
+              source={{uri: this.state.photo}}
+              style={styles.imgStyle}
+            />
+            <Text style={styles.imgText}>Click to edit</Text>
+          </View>
         </TouchableOpacity>
-        <Text style={{position: 'absolute', bottom: 165, right: 140, textAlign: 'center', width: '100%', color: 'white'}}>Click to edit</Text>
-        {/* First name input text */}
-        <Text>First name:</Text>
-        {/* Update firstname state with value from input */}
-        {/* Set default value to the current firstname state */}
-        <TextInput placeholder = "first name..." onChangeText={firstname => this.setState({firstname})} defaultValue={this.state.firstname}></TextInput>
-        {/* Last name input text */}
-        <Text>Last name:</Text>
-        {/* Update lastname state with value from input */}
-        {/* Set default value to the current lastname state */}
-        <TextInput placeholder = "last name..." onChangeText={lastname => this.setState({lastname})} defaultValue={this.state.lastname}></TextInput>
-        {/* Email input text */}
-        <Text>Email:</Text>
-        {/* Update email state with value from input */}
-        {/* Set default value to the current email state */}
-        <TextInput placeholder = "email..." onChangeText={email => this.setState({email})} defaultValue={this.state.email}></TextInput>
-        {/* Password input text */}
-        <Text>Password:</Text>
-        {/* Update password state with value from input */}
-        {/* Set default value to the current password state */}
-        {/* Secure text entry to hide password text */}
-        <TextInput placeholder = "password..." onChangeText={password => this.setState({password})} value={this.state.password} secureTextEntry={true}></TextInput>
-        {/* Sign up button */}
-        <TouchableOpacity onPress={this.onPressButton}><Text>Update profile</Text></TouchableOpacity>
-        {/* Output error if there is an error */}
-        <>
-          {this.state.error && <Text>{this.state.error}</Text>}
-        </>
+        <View style = {styles.form}>
+          {/* Update firstname state with value from input */}
+          {/* Set default value to the current firstname state */}
+          <TextInput style = {styles.textInput} placeholder = "First name..." onChangeText={firstname => this.setState({firstname})} value={this.state.firstname}></TextInput>
+          {/* Update lastname state with value from input */}
+          {/* Set default value to the current lastname state */}
+          <TextInput style = {styles.textInput} placeholder = "Last name..." onChangeText={lastname => this.setState({lastname})} value={this.state.lastname}></TextInput>
+          {/* Update email state with value from input */}
+          {/* Set default value to the current email state */}
+          <TextInput style = {styles.textInput} placeholder = "Email..." onChangeText={email => this.setState({email})} value={this.state.email}></TextInput>
+          {/* Update password state with value from input */}
+          {/* Set default value to the current password state */}
+          {/* Secure text entry to hide password text */}
+          <TextInput style = {styles.textInput} placeholder = "Password..." onChangeText={password => this.setState({password})} value={this.state.password} secureTextEntry={true}></TextInput>
+          {/* Update button */}
+          <TouchableOpacity style = {styles.updateButton} onPress={this.onPressButton}>
+            <Text style = {styles.updateText} >Update profile</Text>
+          </TouchableOpacity>
+          <Text>{' '}</Text>
+          {/* Output error if there is an error */}
+          <>
+            {this.state.error && <Text style = {styles.errorMessage}>{this.state.error}</Text>}
+          </>
+        </View>
+        <Modal
+          visible={this.state.modalVisible}
+          animationType='slide'
+          transparent={true}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalStyle}>
+              <Text style={styles.modalText}>You have successfully updated your account</Text>
+            </View>
+          </View>
+        </Modal>
       </View>
     );
   }
 }
 
 }
+
+const styles = StyleSheet.create({
+  container: 
+  {
+    flex: 1,
+    borderWidth: 3,
+    margin: 5,
+    borderRadius: 15,
+    borderColor: '#069139',
+    backgroundColor: '#E5E4E2'    
+  },
+  pageName:
+  {
+      color: '#069139',
+      fontWeight: 'bold',
+      fontSize: 22,
+      marginTop: 5,
+      marginBottom: 5,
+      marginLeft:15
+  },
+  imgButton:
+  {
+    alignSelf: 'center', 
+    width: 120, 
+    height: 120, 
+    borderRadius: 25, 
+    overflow: 'hidden',
+    marginTop: 100,
+    marginBottom: 45
+  },
+  imgStyle:
+  {
+    width: 120, 
+    height: 120
+  },
+  imgText:
+  {
+    color: 'white', 
+    position: 'absolute', 
+    bottom: 0, 
+    left: 0, 
+    right: 0, 
+    textAlign: 'center', 
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', 
+    width: 120
+  },
+  form: 
+  {
+    alignItems: 'center'
+  },
+  textInput: 
+  {
+    width: '45%',
+    height: 40,
+    padding: 10,
+    borderBottomWidth: 1,
+  },
+  updateButton:
+  {
+    width: '40%',
+    borderRadius: 5,
+    height: 35,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 30,
+    borderWidth: 3,
+    borderColor: '#069139',
+    backgroundColor: '#069139'
+  },
+  updateText:
+  {
+    color: 'white', 
+    fontWeight: 'bold', 
+    fontSize: 20
+  },
+  errorMessage:
+  {
+    color: 'red',
+    textAlign: 'center'
+  },
+  modalContainer: {
+    backgroundColor: 'rgba(52, 52, 52, 0.8)',
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalStyle: {
+    backgroundColor: '#E5E4E2',
+    borderRadius: 10,
+    padding: 15,
+    width: '80%',
+    borderColor: '#069139', 
+    borderWidth: 3, 
+  },
+  modalText:
+  {
+    fontSize: 16,
+    textAlign: 'center'
+  }
+})
 
 export default ProfileUpdate

@@ -201,11 +201,13 @@ class Login extends Component {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  container: 
+  {
     flex: 1,
     backgroundColor: '#E5E4E2'    
   },
-  logo: {
+  logo: 
+  {
     width: '40%',
     marginTop: 150,
     marginBottom: 35,
@@ -216,16 +218,19 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     alignSelf: 'center',
   },
-  logoText: {
+  logoText: 
+  {
     fontSize: 26,
     lineHeight: 25,
     fontWeight: 'bold',
     color: '#069139'
   },
-  form: {
+  form: 
+  {
     alignItems: 'center'
   },
-  textInput: {
+  textInput: 
+  {
     width: '45%',
     height: 40,
     padding: 10,

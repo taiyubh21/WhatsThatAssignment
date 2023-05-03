@@ -17,7 +17,7 @@ class Contacts extends Component {
             saveQuery: "",
             getContacts: false,
             searchCalled: false,
-            currentUserId: null         
+            currentUserId: null    
         }
         this.setCurrentUserId();
     }
@@ -168,8 +168,7 @@ class Contacts extends Component {
             );
         }else{
             console.log(this.state.contactData);
-            return(
-                
+            return(              
                 <View>
                 <TextInput placeholder = "Search..." onChangeText={saveQuery => this.setState({saveQuery})} defaultValue={this.state.saveQuery}></TextInput>
                 {/* Refreshing list of users when button is pressed */}

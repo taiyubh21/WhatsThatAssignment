@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
-import { FlatList, View, ActivityIndicator, Text, TextInput, Button, ScrollView, TouchableOpacity, Modal } from 'react-native';
+import { FlatList, View, ActivityIndicator, Text, TextInput, Button, ScrollView, TouchableOpacity, Modal, StyleSheet } from 'react-native';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 class ConversationDisplay extends Component {
   constructor(props){
@@ -21,6 +23,9 @@ class ConversationDisplay extends Component {
       // Checks if submission has happened or not
       submitted: false,
       sendMessage: "",
+      errorTimer: null,
+      messageError: "",
+      messageTimer: null
     }
     this.setCurrentUserId();
     this.setChatId();
@@ -133,12 +138,18 @@ class ConversationDisplay extends Component {
         this.getData();
       }else if(response.status === 400){
         throw "Please try again"
+      }else{
+        throw "error"
       }
     })
     .catch((error) => {
       console.log(error)
       this.setState({error: "error"})
       this.setState({submitted: false})
+      // Error message will disappear after 5 seconds
+      this.setState({errorTimer: setTimeout(() => {
+        this.setState({error: null, errorTimer: null})
+      }, 5000)})
     });
   }
 
@@ -149,6 +160,10 @@ class ConversationDisplay extends Component {
 
       if(this.state.sendMessage == ""){
           this.setState({error: "Message cannot be empty"})
+          // Error message will disappear after 5 seconds
+          this.setState({errorTimer: setTimeout(() => {
+            this.setState({error: null, errorTimer: null})
+          }, 5000)})
           return;
       }
       this.updateMessage(messageID)
@@ -169,13 +184,21 @@ class ConversationDisplay extends Component {
               // Reseting state for when the modal is used again
               this.setState({ modalVisible: false, selectedMessageId: null });
               this.getData();
-          }else{
+          }else if(response.status === 401){
             // Output error on screen for other responses
+            throw "Please try again"
+          }else{
             throw "error"
           }
         })
         .catch((error) => {
-          console.log(error);
+          console.log(error)
+          this.setState({error: "error"})
+          this.setState({submitted: false})
+          // Error message will disappear after 5 seconds
+          this.setState({errorTimer: setTimeout(() => {
+            this.setState({error: null, errorTimer: null})
+          }, 5000)})
         });
     }
 
@@ -210,24 +233,24 @@ class ConversationDisplay extends Component {
   render(){
     if(this.state.isLoading){
       return(
-        <View>
+        <View style = {styles.container}>
           <ActivityIndicator/>
         </View>
       );
     }else{
       console.log(this.state.chatData)
       return(
-        <View>
-          <Button
-            title="Go back to all conversations"
-            onPress={() => this.props.navigation.navigate('ChatList')}
-          />
-          <TouchableOpacity onPress={() => this.props.navigation.navigate('ChatDetails')}>
-          <Text>{this.state.chatData.name}</Text>
-          <Text>Click to view and edit chat details</Text>
-          </TouchableOpacity>
-          <Text>{"\n\n\n"}</Text>
-          <View style={{ height: 550 }}>
+        <View style = {styles.container}>
+          <View style = {styles.chatDetails}>
+            <TouchableOpacity onPress={() => this.props.navigation.navigate('ChatList')}>
+              <Ionicons name="arrow-back" size={32} color="black" style={styles.arrow} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => this.props.navigation.navigate('ChatDetails')}>
+            <Text style={styles.chatName}>{this.state.chatData.name}</Text>
+            <Text style={styles.chatDetailsText}>Click to view and edit chat details</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={{ height: 660 }}>
             {/* Nested scroll enabled because the flatlist is inside the scrollview */}
             <ScrollView 
               nestedScrollEnabled={true}
@@ -248,19 +271,19 @@ class ConversationDisplay extends Component {
                     return(
                       // Passing the current item in the flatlist into the handleMessage function
                       <TouchableOpacity onPress={() => this.handleMessage(item)}>
-                        <View style={{ alignSelf: 'flex-end', width: 200 }}>
-                          <Text>{item.author.first_name + ' ' + item.author.last_name}</Text>
-                          <Text>{item.message + '   ' + this.formatDate(item.timestamp) + ' ' +this.formatTime(item.timestamp)}</Text>
-                          <Text>{' '}</Text> 
+                        <View style={styles.sentMessages}>
+                          <Text style={styles.nameStyle}>{item.author.first_name + ' ' + item.author.last_name}</Text>
+                          <Text style={styles.messageStyle}>{item.message}</Text>
+                          <Text style={styles.dateStyle}>{this.formatDate(item.timestamp) + ' ' +this.formatTime(item.timestamp)}</Text>
                         </View>
                       </TouchableOpacity>
                     );
                   }else{
                     return(
-                      <View style = {{width: 200}}>
-                        <Text>{item.author.first_name + ' ' + item.author.last_name}</Text>
-                        <Text>{item.message + '   ' + this.formatDate(item.timestamp) + ' ' +this.formatTime(item.timestamp)}</Text>
-                        <Text>{' '}</Text> 
+                      <View style = {styles.recievedMessages}>
+                        <Text style={styles.nameStyle}>{item.author.first_name + ' ' + item.author.last_name}</Text>
+                        <Text style={styles.messageStyle}>{item.message}</Text>
+                        <Text style={styles.dateStyle}>{this.formatDate(item.timestamp) + ' ' +this.formatTime(item.timestamp)}</Text>
                       </View>
                     );
                   }
@@ -270,23 +293,25 @@ class ConversationDisplay extends Component {
             </ScrollView>
           </View>
           <Text>{' '}</Text>
-          <TextInput placeholder = "new message..." onChangeText={message => this.setState({message})} value={this.state.message}></TextInput>
-          <TouchableOpacity onPress={() => {
-            if (this.state.message == "") {
-              this.setState({error: "Please make sure the textbox isn't empty"})
-              return;
-            }
-            this.newMessage()
-            .then(() => this.getData())
-            }}
-            >
-              <Text>Send</Text>
-           </TouchableOpacity>
-           <Modal visible={this.state.modalVisible}>
+          <View style = {styles.messageContainer}>
+            <TextInput style = {styles.textStyle} placeholder = "new message..." onChangeText={message => this.setState({message})} value={this.state.message}></TextInput>
+            <TouchableOpacity style = {styles.msgButton} onPress={() => {
+              if (this.state.message.trim() === "") {
+                return;
+              }
+              this.newMessage()
+              .then(() => this.getData())
+              }}
+              >
+                <Ionicons name="send" size={24} color="black"/>
+            </TouchableOpacity>
+          </View>
+          <Modal visible={this.state.modalVisible}>
             <View>
               {/* Using handlePress(message) so when a message is clicked on it passes that specific message in as the parameter into the text input*/}      
               {console.log("Selected Message ID:", this.state.selectedMessage.message_id)}
               <TextInput placeholder = "Message..." onChangeText={sendMessage => this.setState({sendMessage})} defaultValue={this.state.selectedMessage.message}></TextInput>  
+              <Text>{' '}</Text>
               {/* Output error if there is an error */}
               <>
                 {this.state.error && <Text>{this.state.error}</Text>}
@@ -301,5 +326,98 @@ class ConversationDisplay extends Component {
     }
   }
 }
+
+const styles = StyleSheet.create({
+  container: 
+  {
+    flex: 1,
+    borderWidth: 3,
+    margin: 5,
+    borderRadius: 15,
+    borderColor: '#069139',
+    backgroundColor: '#E5E4E2'  
+  },
+  chatDetails:
+  {
+    marginTop: 8,
+    marginLeft: 10,
+    marginRight: 15,
+    flexDirection: 'row',
+    borderBottomWidth: 3,
+    width: '98%',
+    alignSelf: 'center'
+  },
+  arrow:
+  {
+    marginTop: 3,
+    marginLeft: 8
+  },
+  chatName:
+  {
+    color: '#069139',
+    fontWeight: 'bold',
+    fontSize: 22,
+    marginTop: 5,
+    marginLeft: 8
+  },
+  chatDetailsText:
+  {
+    marginLeft: 10,
+    marginBottom: 5
+  },
+  sentMessages:
+  {
+    alignSelf: 'flex-end', 
+    width: 170,
+    backgroundColor: '#069139',
+    borderRadius: 15,
+    padding: 8,
+    marginTop: 5,
+    marginRight: 10,
+    overflow: 'hidden'
+  },
+  recievedMessages:
+  {
+    width: 170,
+    backgroundColor: 'grey',
+    borderRadius: 15,
+    padding: 8,
+    marginTop: 5,
+    marginLeft: 10,
+    overflow: 'hidden'
+  },
+  nameStyle:
+  {
+    fontWeight: 'bold',
+    color: 'white'
+  },
+  messageStyle:
+  {
+    color:'white'
+  },
+  dateStyle:
+  {
+    color: 'white',
+    fontSize: 12
+  },
+  messageContainer:
+  {
+    flexDirection: 'row',
+  },
+  textStyle:
+  {
+    backgroundColor: 'white',
+    padding: 6,
+    borderRadius: 8,
+    borderWidth: 1,
+    marginLeft: 6,
+    width: '90%'
+  },
+  msgButton:
+  {
+    marginLeft: 5,
+    marginTop: 3
+  }
+})
 
 export default ConversationDisplay

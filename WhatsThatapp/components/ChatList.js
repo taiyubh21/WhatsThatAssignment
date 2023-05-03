@@ -115,7 +115,7 @@ class Chats extends Component {
     }
 
     onPressButton(){
-        if(this.state.chatname == ""){
+        if(this.state.chatname.trim() === ""){
             this.setState({error: "Please make sure the textbox isn't empty"})
             this.setState({errorTimer: setTimeout(() => {
                 this.setState({error: null, errorTimer: null})

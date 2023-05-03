@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { FlatList, View, ActivityIndicator, Text, TextInput, Button, ScrollView } from 'react-native';
+import { FlatList, View, ActivityIndicator, Text, TextInput, Button, ScrollView, Image } from 'react-native';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -17,9 +17,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
             currentUserId: null,
             // To store users search query
             saveQuery: "",
-            limit: 4,
+            limit: 8,
             offset: 0,
-            newUserListData: []
+            newUserListData: [],
         };
         this.setCurrentUserId();
     }
@@ -31,12 +31,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
         const userId = await AsyncStorage.getItem("whatsthat_user_id");
         this.setState({ currentUserId: parseInt(userId) });
       }
-
-    // setLimit(){
-    //   this.setState({limit: 8, offset: 0}, () => {
-    //     this.getData();
-    //   });
-    // }
   
     setOffset(newoffset){
       this.setState({offset: newoffset}, () => {

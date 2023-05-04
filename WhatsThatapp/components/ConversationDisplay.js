@@ -306,19 +306,27 @@ class ConversationDisplay extends Component {
                 <Ionicons name="send" size={24} color="black"/>
             </TouchableOpacity>
           </View>
-          <Modal visible={this.state.modalVisible}>
-            <View>
+          <Modal 
+            visible={this.state.modalVisible}
+            animationType='slide'
+            transparent={true}
+          >
+            <View style={styles.modalContainer}>
               {/* Using handlePress(message) so when a message is clicked on it passes that specific message in as the parameter into the text input*/}      
               {console.log("Selected Message ID:", this.state.selectedMessage.message_id)}
-              <TextInput placeholder = "Message..." onChangeText={sendMessage => this.setState({sendMessage})} defaultValue={this.state.selectedMessage.message}></TextInput>  
-              <Text>{' '}</Text>
-              {/* Output error if there is an error */}
-              <>
-                {this.state.error && <Text>{this.state.error}</Text>}
-              </>    
-              <Button title="Update" onPress={() => {this.onPressButton(this.state.selectedMessage.message_id);}}/>
-              <Button title="Delete" onPress={() => {this.deleteMessage(this.state.selectedMessage.message_id);}}/>
-              <Button title="Cancel" onPress={() => this.setState({ modalVisible: false})} />
+              <View style={styles.modalStyle}>
+                <TextInput placeholder = "Message..." onChangeText={sendMessage => this.setState({sendMessage})} defaultValue={this.state.selectedMessage.message}></TextInput>  
+                <Text>{' '}</Text>
+                {/* Output error if there is an error */}
+                <>
+                  {this.state.error && <Text>{this.state.error}</Text>}
+                </>
+                <View style={styles.buttonContainer}>    
+                  <Button style={styles.updateBtn} title="Update" onPress={() => {this.onPressButton(this.state.selectedMessage.message_id);}}/>
+                  <Button style={styles.deleteBtn} title="Delete" onPress={() => {this.deleteMessage(this.state.selectedMessage.message_id);}}/>
+                </View>
+                <Button title="Cancel" onPress={() => this.setState({ modalVisible: false})} />
+              </View>
             </View>
           </Modal>
           </View>
@@ -417,6 +425,48 @@ const styles = StyleSheet.create({
   {
     marginLeft: 5,
     marginTop: 3
+  },
+  modalContainer: 
+  {
+    backgroundColor: 'rgba(52, 52, 52, 0.8)',
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalStyle: 
+  {
+    backgroundColor: '#E5E4E2',
+    borderRadius: 10,
+    padding: 15,
+    width: '80%',
+    borderColor: '#069139', 
+    borderWidth: 3, 
+  },
+  modalText:
+  {
+    fontSize: 16,
+    textAlign: 'center'
+  },
+  buttonContainer:
+  {
+    marginTop: 8,
+    marginLeft: 10,
+    marginRight: 15,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between'
+  },
+  updateBtn:
+  {
+    marginLeft: 50
+  },
+  deleteBtn:
+  {
+    marginRight: 50,
+  },
+  cancelBtn:
+  {
+
   }
 })
 

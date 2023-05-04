@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { FlatList, View, ActivityIndicator, Text, TextInput, Button, ScrollView } from 'react-native';
+import { FlatList, View, ActivityIndicator, Text, TextInput, Button, ScrollView, Image } from 'react-native';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -17,7 +17,7 @@ class Contacts extends Component {
             saveQuery: "",
             getContacts: false,
             searchCalled: false,
-            currentUserId: null    
+            currentUserId: null
         }
         this.setCurrentUserId();
     }
@@ -135,7 +135,7 @@ class Contacts extends Component {
             console.log(error);
           });
       }
-
+      
     // For refreshing page
     componentDidMount() {
         this.getData();
@@ -184,7 +184,6 @@ class Contacts extends Component {
                         renderItem= {({item}) => (
                             <View>
                                 {/*<Text>{JSON.stringify(item)}</Text>*/}
-
                                 {/* Concatenating first name and last name together */}      
                                 <>
                                 {this.state.getContacts && <Text>{item.first_name + ' ' + item.last_name}</Text> }

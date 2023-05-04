@@ -303,7 +303,7 @@ class ConversationDisplay extends Component {
               .then(() => this.getData())
               }}
               >
-                <Ionicons name="send" size={24} color="black"/>
+                <Ionicons name="send" size={26} color="black"/>
             </TouchableOpacity>
           </View>
           <Modal 
@@ -315,17 +315,23 @@ class ConversationDisplay extends Component {
               {/* Using handlePress(message) so when a message is clicked on it passes that specific message in as the parameter into the text input*/}      
               {console.log("Selected Message ID:", this.state.selectedMessage.message_id)}
               <View style={styles.modalStyle}>
-                <TextInput placeholder = "Message..." onChangeText={sendMessage => this.setState({sendMessage})} defaultValue={this.state.selectedMessage.message}></TextInput>  
+                <TextInput style = {styles.textStyle} placeholder = "Message..." onChangeText={sendMessage => this.setState({sendMessage})} defaultValue={this.state.selectedMessage.message}></TextInput>  
                 <Text>{' '}</Text>
                 {/* Output error if there is an error */}
                 <>
                   {this.state.error && <Text>{this.state.error}</Text>}
                 </>
                 <View style={styles.buttonContainer}>    
-                  <Button style={styles.updateBtn} title="Update" onPress={() => {this.onPressButton(this.state.selectedMessage.message_id);}}/>
-                  <Button style={styles.deleteBtn} title="Delete" onPress={() => {this.deleteMessage(this.state.selectedMessage.message_id);}}/>
+                  <TouchableOpacity style={styles.updateBtn} onPress={() => {this.onPressButton(this.state.selectedMessage.message_id);}}>
+                    <Text style={{color: 'white', fontWeight: 'bold'}}>Update</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.deleteBtn} onPress={() => {this.deleteMessage(this.state.selectedMessage.message_id);}}>
+                    <Text style={{color: 'white', fontWeight: 'bold'}}>Delete</Text>
+                  </TouchableOpacity>
                 </View>
-                <Button title="Cancel" onPress={() => this.setState({ modalVisible: false})} />
+                <TouchableOpacity style={styles.cancelBtn} onPress={() => this.setState({ modalVisible: false})}>
+                  <Text style={{color: 'red', textAlign: 'center', fontWeight: 'bold'}}>Cancel</Text>
+                </TouchableOpacity>
               </View>
             </View>
           </Modal>
@@ -419,11 +425,12 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     marginLeft: 6,
-    width: '90%'
+    width: '92%'
   },
   msgButton:
   {
-    marginLeft: 5,
+    marginLeft: 1,
+    marginRight: 1,
     marginTop: 3
   },
   modalContainer: 
@@ -447,26 +454,45 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'center'
   },
-  buttonContainer:
-  {
-    marginTop: 8,
-    marginLeft: 10,
-    marginRight: 15,
+  buttonContainer: {
+    flex: 1,
+    marginTop: 5,
     flexDirection: 'row',
+    alignSelf: 'center',
+    justifyContent: 'space-around', // reduce space between buttons
+    width: '90%',
+  },
+  updateBtn: {
+    width: '40%',
+    borderRadius: 5,
+    height: 35,
     alignItems: 'center',
-    justifyContent: 'space-between'
+    justifyContent: 'center',
+    borderWidth: 3,
+    borderColor: '#069139',
+    backgroundColor: '#069139'
   },
-  updateBtn:
-  {
-    marginLeft: 50
+  deleteBtn: {
+    width: '40%',
+    borderRadius: 5,
+    height: 35,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 3,
+    borderColor: '#069139',
+    backgroundColor: '#069139'
   },
-  deleteBtn:
-  {
-    marginRight: 50,
-  },
+  
   cancelBtn:
   {
-
+    width: '50%',
+    marginTop: 8,
+    borderRadius: 5,
+    height: 35,
+    alignSelf: 'center',
+    justifyContent: 'center',
+    borderWidth: 3,
+    borderColor: 'red',
   }
 })
 

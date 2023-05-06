@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { FlatList, View, ActivityIndicator, Text, TextInput, Button, ScrollView } from 'react-native';
+import { FlatList, View, ActivityIndicator, Text, TextInput, Button, ScrollView, Image } from 'react-native';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -19,7 +19,8 @@ class AddtoChat extends Component {
             searchCalled: false,
             currentUserId: null,
             currentChatId: null,
-            currentMembers: []         
+            currentMembers: [],
+            photo: {}         
         }
         this.setCurrentUserId();
         this.setChatId();
@@ -56,10 +57,17 @@ class AddtoChat extends Component {
         .then((responseJson) => {
             // Updating the contactData state with the retrieved data
             this.setState({
-                isLoading: false,
+                //isLoading: false,
                 contactData: responseJson,
                 getContacts: true,
                 searchCalled: false
+              }, () => {
+                // Refresh images 
+                if (this.state.contactData && this.state.contactData.length > 0) {
+                    for (let i = 0; i < this.state.contactData.length; i++) {
+                        this.getImage(this.state.contactData[i].user_id);
+                    }
+                }
             })
         })
         .catch((error)=> {
@@ -84,7 +92,7 @@ class AddtoChat extends Component {
         })
         .then((responseJson) => {
             this.setState({
-                isLoading: false,
+                //isLoading: false,
                 currentMembers: responseJson
             })
             console.log(this.state.currentMembers)
@@ -124,8 +132,6 @@ class AddtoChat extends Component {
         });
     }
 
-    
-
     async addMember(userID){
         return fetch("http://localhost:3333/api/1.0.0/chat/" + this.state.currentChatId + "/user/" + userID,
         {
@@ -150,6 +156,39 @@ class AddtoChat extends Component {
             console.log(error);
         });
       }
+
+      async getImage(userId) {
+        fetch("http://localhost:3333/api/1.0.0/user/"+ userId + "/photo", {
+            method: "GET",
+            headers: {
+                'Content-Type': 'media/png',
+                "X-Authorization": await AsyncStorage.getItem("whatsthat_session_token")
+            }
+        })
+        .then((response) => {
+            if(response.status === 200){
+              return response.blob()
+            }else{
+              throw "Something went wrong"
+            }
+        })
+        .then((resBlob) => {
+            let data = URL.createObjectURL(resBlob);
+            // Updating object state with photo data
+            this.setState((prevState) => ({
+              // Spreading open the previous photo object and adding the new photo data with the user id
+              photo: {
+                ...prevState.photo,
+                [userId]: data
+              },
+              // After the photo render is done moving on to displaying in the flatlist
+              isLoading: false
+            }));
+        })
+        .catch((err) => {
+            console.log(err)
+        })
+    }
 
 
     // For refreshing page
@@ -186,6 +225,15 @@ class AddtoChat extends Component {
             return(
                 <View>
                     <ActivityIndicator/>
+                    {/* Flatlist being used to retrive all the photos based on the user id of the contactData */}
+                    {/* This is happening before anything is actually displayed */}
+                    <FlatList
+                      data={this.state.contactData}              
+                        renderItem= {({item}) => {
+                          this.getImage(item.user_id)
+                        }}
+                        keyExtractor={(item) => item.user_id}
+                      />
                 </View>
             );
         }else{
@@ -215,6 +263,13 @@ class AddtoChat extends Component {
                             if(!currentMemberID){
                                 return(
                                     <View>
+                                      <Image
+                                        source={{uri: this.state.photo[item.user_id]}}
+                                        style={{
+                                          width: 100,
+                                          height: 100
+                                        }}
+                                      />
                                         {/*<Text>{JSON.stringify(item)}</Text>*/}
 
                                         {/* Concatenating first name and last name together */}      

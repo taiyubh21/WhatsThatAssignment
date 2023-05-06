@@ -20,6 +20,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
             limit: 8,
             offset: 0,
             newUserListData: [],
+            blockedData: [],
+            contactData: []
         };
         this.setCurrentUserId();
     }
@@ -70,6 +72,62 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
         });
     }
 
+    async getBlocked(){
+      return fetch("http://localhost:3333/api/1.0.0/blocked", {
+          method: "GET",
+          headers: {
+            'Content-Type': 'application/json',
+            "X-Authorization": await AsyncStorage.getItem("whatsthat_session_token")
+          }
+        })    
+
+        .then((response) => {
+          if(response.status === 200){
+              return response.json()
+          }else{
+              throw "Error";
+          }
+      })
+      .then((responseJson) => {
+          // Updating the contactData state with the retrieved data
+          this.setState({
+              isLoading: false,
+              blockedData: responseJson
+          })
+      })
+      .catch((error)=> {
+          console.log(error);
+      });
+  }
+
+  async getContacts(){
+    return fetch("http://localhost:3333/api/1.0.0/contacts", {
+        method: "GET",
+        headers: {
+          'Content-Type': 'application/json',
+          "X-Authorization": await AsyncStorage.getItem("whatsthat_session_token")
+        }
+      })    
+
+      .then((response) => {
+        if(response.status === 200){
+            return response.json()
+        }else{
+            throw "Error";
+        }
+    })
+    .then((responseJson) => {
+        // Updating the contactData state with the retrieved data
+        this.setState({
+            isLoading: false,
+            contactData: responseJson,
+        })
+    })
+    .catch((error)=> {
+        console.log(error);
+    });
+}
+
     async getNextPage(){
       let offset = parseInt(this.state.offset);
       console.log(offset);
@@ -115,6 +173,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
             // If the response is ok  
             if(response.status === 200){
                 console.log('Contact added successfully');
+                this.getContacts();
             // Else if its bad then throw an error
             }else{
               // Output error on screen for other responses
@@ -129,6 +188,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
     componentDidMount() {
         this.getData();
         this.getNextPage();
+        this.getContacts();
+        this.getBlocked();
         this.resetData = this.props.navigation.addListener('focus', () => {
           // Reset states back to how they were
           this.setState({
@@ -139,6 +200,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
             // Call getData after resetting the state
             this.getData();
             this.getNextPage();
+            this.getContacts();
+            this.getBlocked();
           });
         });
       }
@@ -181,8 +244,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
                           // For debugging
                           console.log("item user id:", item.user_id);
                           console.log("current user id:", this.state.currentUserId);
-                          // If the user in the data has the same ID as the current user logged in then
-                          // don't output their account
+                          console.log(this.state.contactData.user_id)
+                          const matchingContact = this.state.contactData.find((contact) => contact.user_id === item.user_id);
+                          const matchingBlocked = this.state.blockedData.find((blocked) => blocked.user_id === item.user_id);
                           if(item.user_id == this.state.currentUserId){
                               return(
                                   <View>
@@ -193,7 +257,28 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
                                       <Text>{' '}</Text>
                                   </View>
                                   );
-                              // If the user is the current user logged in return nothing
+                              } else if(matchingContact){
+                                return(
+                                  <View>
+                                      {/* Concatenating first name and last name together */}                        
+                                      <Text>{item.given_name + ' ' + item.family_name}</Text> 
+                                      <Text>{item.email}</Text> 
+                                      <Text>This user is in your contacts</Text>
+                                      {/* Empty line inbetween account details*/}
+                                      <Text>{' '}</Text>
+                                  </View>
+                                  );
+                              } else if(matchingBlocked){
+                                return(
+                                  <View>
+                                      {/* Concatenating first name and last name together */}                        
+                                      <Text>{item.given_name + ' ' + item.family_name}</Text> 
+                                      <Text>{item.email}</Text> 
+                                      <Text>This user has been blocked</Text>
+                                      {/* Empty line inbetween account details*/}
+                                      <Text>{' '}</Text>
+                                  </View>
+                                  );
                               } else{
                                 return(
                                   <View>

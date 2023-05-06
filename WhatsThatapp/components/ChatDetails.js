@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text, TextInput, View, TouchableOpacity, Button, ActivityIndicator, ScrollView, FlatList} from 'react-native';
+import { Text, TextInput, View, TouchableOpacity, Button, ActivityIndicator, ScrollView, FlatList, Image} from 'react-native';
 
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -17,7 +17,8 @@ class ChatDetails extends Component {
       // Error message for failed validation
       error: "",
       // Checks if submission has happened or not
-      submitted: false
+      submitted: false,
+      photo: {}
     }
     // Binding to onPressButton function
     this.onPressButton = this.onPressButton.bind(this)
@@ -41,7 +42,7 @@ class ChatDetails extends Component {
     // Checking if the currentChatID is null before making the API call
     if (!this.state.currentChatId) {
       this.setState({
-        isLoading: false,
+        //isLoading: false,
         chatData: []
       });
       return;
@@ -63,10 +64,16 @@ class ChatDetails extends Component {
     })
     .then((responseJson) => {
       this.setState({
-          isLoading: false,
+          //isLoading: false,
           chatData: responseJson
+        }, () => {
+          if (this.state.chatData.members && this.state.chatData.members.length > 0) {
+              for (let i = 0; i < this.state.chatData.members.length; i++) {
+                  this.getImage(this.state.chatData.members[i].user_id);
+              }
+          }
       })
-    })
+  })
     .catch((error)=> {
       console.log(error);
     });
@@ -138,6 +145,39 @@ class ChatDetails extends Component {
       });
   }
 
+  async getImage(userId) {
+    fetch("http://localhost:3333/api/1.0.0/user/"+ userId + "/photo", {
+        method: "GET",
+        headers: {
+            'Content-Type': 'media/png',
+            "X-Authorization": await AsyncStorage.getItem("whatsthat_session_token")
+        }
+    })
+    .then((response) => {
+        if(response.status === 200){
+          return response.blob()
+        }else{
+          throw "Something went wrong"
+        }
+    })
+    .then((resBlob) => {
+        let data = URL.createObjectURL(resBlob);
+        // Updating object state with photo data
+        this.setState((prevState) => ({
+          // Spreading open the previous photo object and adding the new photo data with the user id
+          photo: {
+            ...prevState.photo,
+            [userId]: data
+          },
+          // After the photo render is done moving on to displaying in the flatlist
+          isLoading: false
+        }));
+    })
+    .catch((err) => {
+        console.log(err)
+    })
+}
+
   // For input validation
   onPressButton(){
     this.setState({submitted: true})
@@ -172,6 +212,15 @@ class ChatDetails extends Component {
           return(
               <View>
                   <ActivityIndicator/>
+                    {/* Flatlist being used to retrive all the photos based on the user id of the contactData */}
+                    {/* This is happening before anything is actually displayed */}
+                    <FlatList
+                      data={this.state.chatData.members}              
+                        renderItem= {({item}) => {
+                          this.getImage(item.user_id)
+                        }}
+                        keyExtractor={(item) => item.user_id}
+                      />
               </View>
           );
         }else{
@@ -201,6 +250,13 @@ class ChatDetails extends Component {
                 data={this.state.chatData.members}
                 renderItem={({item}) => (
                   <View>
+                    <Image
+                      source={{uri: this.state.photo[item.user_id]}}
+                      style={{
+                        width: 100,
+                        height: 100
+                      }}
+                    />
                     <Text>{item.first_name + ' ' + item.last_name}</Text>
                     <Button
                       title="Remove member"

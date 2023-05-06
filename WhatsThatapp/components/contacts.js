@@ -17,7 +17,8 @@ class Contacts extends Component {
             saveQuery: "",
             getContacts: false,
             searchCalled: false,
-            currentUserId: null
+            currentUserId: null,
+            photo: {}
         }
         this.setCurrentUserId();
     }
@@ -47,10 +48,17 @@ class Contacts extends Component {
         .then((responseJson) => {
             // Updating the contactData state with the retrieved data
             this.setState({
-                isLoading: false,
+                //isLoading: false,
                 contactData: responseJson,
                 getContacts: true,
                 searchCalled: false
+              }, () => {
+                // Refresh images 
+                if (this.state.contactData && this.state.contactData.length > 0) {
+                    for (let i = 0; i < this.state.contactData.length; i++) {
+                        this.getImage(this.state.contactData[i].user_id);
+                    }
+                }
             })
         })
         .catch((error)=> {
@@ -76,7 +84,7 @@ class Contacts extends Component {
         .then((responseJson) => {
             // Updating the contactData state with the retrieved data
             this.setState({
-                isLoading: false,
+                //isLoading: false,
                 contactData: responseJson,
                 searchCalled: true,
                 getContacts: false
@@ -135,6 +143,39 @@ class Contacts extends Component {
             console.log(error);
           });
       }
+
+      async getImage(userId) {
+        fetch("http://localhost:3333/api/1.0.0/user/"+ userId + "/photo", {
+            method: "GET",
+            headers: {
+                'Content-Type': 'media/png',
+                "X-Authorization": await AsyncStorage.getItem("whatsthat_session_token")
+            }
+        })
+        .then((response) => {
+            if(response.status === 200){
+              return response.blob()
+            }else{
+              throw "Something went wrong"
+            }
+        })
+        .then((resBlob) => {
+            let data = URL.createObjectURL(resBlob);
+            // Updating object state with photo data
+            this.setState((prevState) => ({
+              // Spreading open the previous photo object and adding the new photo data with the user id
+              photo: {
+                ...prevState.photo,
+                [userId]: data
+              },
+              // After the photo render is done moving on to displaying in the flatlist
+              isLoading: false
+            }));
+        })
+        .catch((err) => {
+            console.log(err)
+        })
+    }
       
     // For refreshing page
     componentDidMount() {
@@ -164,6 +205,15 @@ class Contacts extends Component {
             return(
                 <View>
                     <ActivityIndicator/>
+                    {/* Flatlist being used to retrive all the photos based on the user id of the contactData */}
+                    {/* This is happening before anything is actually displayed */}
+                    <FlatList
+                      data={this.state.contactData}              
+                        renderItem= {({item}) => {
+                          this.getImage(item.user_id)
+                        }}
+                        keyExtractor={(item) => item.user_id}
+                      />
                 </View>
             );
         }else{
@@ -180,9 +230,16 @@ class Contacts extends Component {
                   {/* Nested scroll enabled because the flatlist is inside the scrollview */}
                   <ScrollView nestedScrollEnabled={true}>
                     <FlatList
-                    data={this.state.contactData}              
-                        renderItem= {({item}) => (
+                    data={this.state.contactData}   
+                        renderItem= {({item}) => (                        
                             <View>
+                              <Image
+                                source={{uri: this.state.photo[item.user_id]}}
+                                style={{
+                                  width: 100,
+                                  height: 100
+                                }}
+                              />
                                 {/*<Text>{JSON.stringify(item)}</Text>*/}
                                 {/* Concatenating first name and last name together */}      
                                 <>
@@ -204,14 +261,14 @@ class Contacts extends Component {
                                     onPress={() => this.blockUser(item.user_id)}
                                 />
                             </View>
-                            )}
+                        )}
                         keyExtractor={(item) => item.user_id}
                     />
                     </ScrollView>
                   </View>
                   <Text>{' '}</Text>
                   <Button
-                    title="Add users"
+                    title="View all users"
                     onPress={() => this.props.navigation.navigate('UserListDisplay')}
                   />
                   <Button

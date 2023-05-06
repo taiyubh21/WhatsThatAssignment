@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { FlatList, View, ActivityIndicator, Text, TextInput, Button, ScrollView } from 'react-native';
+import { FlatList, View, ActivityIndicator, Text, TextInput, Button, ScrollView, Image } from 'react-native';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -13,7 +13,8 @@ class BlockedUsers extends Component {
             isLoading: true,
             // For array of contact data
             blockedData: [],
-            currentUserId: null
+            currentUserId: null,
+            photo: {}
         }
         this.setCurrentUserId();
     }
@@ -43,7 +44,7 @@ class BlockedUsers extends Component {
         .then((responseJson) => {
             // Updating the contactData state with the retrieved data
             this.setState({
-                isLoading: false,
+                //isLoading: false,
                 blockedData: responseJson
             })
         })
@@ -76,6 +77,39 @@ class BlockedUsers extends Component {
           });
       }
 
+      async getImage(userId) {
+        fetch("http://localhost:3333/api/1.0.0/user/"+ userId + "/photo", {
+            method: "GET",
+            headers: {
+                'Content-Type': 'media/png',
+                "X-Authorization": await AsyncStorage.getItem("whatsthat_session_token")
+            }
+        })
+        .then((response) => {
+            if(response.status === 200){
+              return response.blob()
+            }else{
+              throw "Something went wrong"
+            }
+        })
+        .then((resBlob) => {
+            let data = URL.createObjectURL(resBlob);
+            // Updating object state with photo data
+            this.setState((prevState) => ({
+              // Spreading open the previous photo object and adding the new photo data with the user id
+              photo: {
+                ...prevState.photo,
+                [userId]: data
+              },
+              // After the photo render is done moving on to displaying in the flatlist
+              isLoading: false
+            }));
+        })
+        .catch((err) => {
+            console.log(err)
+        })
+    }
+
     componentDidMount() {
         this.getData();
       }
@@ -85,7 +119,16 @@ class BlockedUsers extends Component {
         if(this.state.isLoading){
             return(
                 <View>
-                    <ActivityIndicator/>
+                    <Text>No blocked users</Text>
+                    {/* Flatlist being used to retrive all the photos based on the user id of the contactData */}
+                    {/* This is happening before anything is actually displayed */}
+                    <FlatList
+                      data={this.state.blockedData}              
+                        renderItem= {({item}) => {
+                          this.getImage(item.user_id)
+                        }}
+                        keyExtractor={(item) => item.user_id}
+                      />
                 </View>
             );
         }else{
@@ -98,7 +141,14 @@ class BlockedUsers extends Component {
                     <FlatList
                     data={this.state.blockedData}              
                         renderItem= {({item}) => (
-                            <View> 
+                            <View>
+                              <Image
+                                source={{uri: this.state.photo[item.user_id]}}
+                                style={{
+                                  width: 100,
+                                  height: 100
+                                }}
+                              />
                                 <Text>{item.first_name + ' ' + item.last_name}</Text>                   
                                 <Text>{item.email}</Text> 
                                 {/* Empty line inbetween account details*/}

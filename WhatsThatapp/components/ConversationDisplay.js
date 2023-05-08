@@ -24,7 +24,6 @@ class ConversationDisplay extends Component {
       submitted: false,
       sendMessage: "",
       errorTimer: null,
-      messageError: "",
       messageTimer: null
     }
     this.setCurrentUserId();
@@ -224,10 +223,14 @@ class ConversationDisplay extends Component {
       .then(() => this.getData())
       .catch((error) => console.log(error));
     })
+    this.messageInterval = setInterval(() => {
+      this.getData()
+    }, 2000)
   }
 
   componentWillUnmount(){
     this.unsubscribe();
+    clearInterval(this.messageInterval);
   }
 
   render(){
@@ -319,7 +322,7 @@ class ConversationDisplay extends Component {
                 <Text>{' '}</Text>
                 {/* Output error if there is an error */}
                 <>
-                  {this.state.error && <Text>{this.state.error}</Text>}
+                  {this.state.error && <Text style = {styles.errorMessage}>{this.state.error}</Text>}
                 </>
                 <View style={styles.buttonContainer}>    
                   <TouchableOpacity style={styles.updateBtn} onPress={() => {this.onPressButton(this.state.selectedMessage.message_id);}}>
@@ -459,7 +462,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
     flexDirection: 'row',
     alignSelf: 'center',
-    justifyContent: 'space-around', // reduce space between buttons
+    justifyContent: 'space-around', 
     width: '90%',
   },
   updateBtn: {
@@ -493,6 +496,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 3,
     borderColor: 'red',
+  },
+  errorMessage:
+  {
+    color: 'red',
+    textAlign: 'center'
   }
 })
 

@@ -1,7 +1,11 @@
 import React, { Component } from 'react';
-import { FlatList, View, ActivityIndicator, Text, TextInput, Button, ScrollView, Image } from 'react-native';
+import { FlatList, View, ActivityIndicator, Text, TextInput, Button, ScrollView, Image, StyleSheet, TouchableOpacity } from 'react-native';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import { Searchbar } from 'react-native-paper';
+
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 class Contacts extends Component {
 
@@ -203,8 +207,25 @@ class Contacts extends Component {
         // If data is still being fetched return a loading spinner
         if(this.state.isLoading){
             return(
-                <View>
-                    <ActivityIndicator/>
+                <View style={styles.container}>
+                  <Text style={styles.pageName}>Contacts</Text>
+                  <View style={styles.buttonContainer}>
+                    <TouchableOpacity
+                      style={styles.allUsers}
+                      onPress={() => this.props.navigation.navigate('UserListDisplay')}
+                    >
+                      <Text style={styles.buttonText}>View all users</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.blockedUsers}
+                      onPress={() => this.props.navigation.navigate('BlockedUsers')}
+                    >
+                      <Text style={styles.buttonText}>View blocked users</Text>
+                    </TouchableOpacity>
+                  </View>
+                    <View style={styles.noContacts}>
+                      <Text style={{fontSize: 18}}>No new contacts</Text>
+                    </View>
                     {/* Flatlist being used to retrive all the photos based on the user id of the contactData */}
                     {/* This is happening before anything is actually displayed */}
                     <FlatList
@@ -219,67 +240,200 @@ class Contacts extends Component {
         }else{
             console.log(this.state.contactData);
             return(              
-                <View>
-                <TextInput placeholder = "Search..." onChangeText={saveQuery => this.setState({saveQuery})} defaultValue={this.state.saveQuery}></TextInput>
-                {/* Refreshing list of users when button is pressed */}
-                <Button
-                    title="Search"
-                    onPress={() => this.searchContacts()}
+                <View style={styles.container}>
+                <Text style={styles.pageName}>Contacts</Text>
+                <Searchbar
+                  style={styles.searchBar}
+                  placeholder="Search..."
+                  onChangeText={saveQuery => {
+                    this.setState({ saveQuery }, () => {
+                      this.searchContacts();
+                    });
+                  }}
+                  value={this.state.saveQuery}
+                  inputStyle={{ paddingTop: 0, paddingBottom: 18 }}
                 />
-                <View style={{ height: 600 }}>
+                <View style={{ height: 640 }}>
                   {/* Nested scroll enabled because the flatlist is inside the scrollview */}
                   <ScrollView nestedScrollEnabled={true}>
                     <FlatList
                     data={this.state.contactData}   
                         renderItem= {({item}) => (                        
-                            <View>
+                            <View style={styles.detailsContainer}>
                               <Image
                                 source={{uri: this.state.photo[item.user_id]}}
-                                style={{
-                                  width: 100,
-                                  height: 100
-                                }}
+                                style={styles.image}
                               />
                                 {/*<Text>{JSON.stringify(item)}</Text>*/}
-                                {/* Concatenating first name and last name together */}      
-                                <>
-                                {this.state.getContacts && <Text>{item.first_name + ' ' + item.last_name}</Text> }
-                                </>   
-                                <>
-                                {this.state.searchCalled && <Text>{item.given_name + ' ' + item.family_name}</Text>  }
-                                </>                   
-                                <Text>{item.email}</Text> 
-                                {/* Empty line inbetween account details*/}
-                                <Text>{' '}</Text>
-                                {/* Passes user id into deleteContacts and then calls this.getData() so you can visibly see the contact has deleted */}
-                                <Button
-                                    title="Remove contact"
-                                    onPress={() => {this.deleteContacts(item.user_id)}}
-                                />
-                                <Button
-                                    title="Block user"
-                                    onPress={() => this.blockUser(item.user_id)}
-                                />
+                                {/* Concatenating first name and last name together */}  
+                                <View style= {styles.nameStyle}>
+                                  <>
+                                  {this.state.getContacts && <Text style={styles.nameText}>{item.first_name + ' ' + item.last_name}</Text> }
+                                  </>   
+                                  <>
+                                  {this.state.searchCalled && <Text style={styles.nameText}>{item.given_name + ' ' + item.family_name}</Text>  }
+                                  </>                   
+                                  <Text style={styles.email}>{item.email}</Text> 
+                                  {/* Empty line inbetween account details*/}
+                                  <Text>{' '}</Text>
+                                </View>    
+                                <TouchableOpacity
+                                  onPress={() => {this.deleteContacts(item.user_id)}}
+                                  style={styles.remove}
+                                >
+                                  <Ionicons name="person-remove" size={26} color="black"/>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                  onPress={() => {this.blockUser(item.user_id)}}
+                                  style={styles.block}
+                                >
+                                  <Text style={styles.buttonText}>Block</Text>
+                                </TouchableOpacity>
                             </View>
                         )}
                         keyExtractor={(item) => item.user_id}
                     />
                     </ScrollView>
                   </View>
-                  <Text>{' '}</Text>
-                  <Button
-                    title="View all users"
-                    onPress={() => this.props.navigation.navigate('UserListDisplay')}
-                  />
-                  <Button
-                    title="View blocked users"
-                    onPress={() => this.props.navigation.navigate('BlockedUsers')}
-                  />
+                  <View style={styles.buttonContainer}>
+                    <TouchableOpacity
+                      style={styles.allUsers}
+                      onPress={() => this.props.navigation.navigate('UserListDisplay')}
+                    >
+                      <Text style={styles.buttonText}>View all users</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.blockedUsers}
+                      onPress={() => this.props.navigation.navigate('BlockedUsers')}
+                    >
+                      <Text style={styles.buttonText}>View blocked users</Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
             );
         }
     
     }
 }
+
+const styles = StyleSheet.create({
+  container: 
+  {
+    flex: 1,
+    borderWidth: 3,
+    margin: 5,
+    borderRadius: 15,
+    borderColor: '#069139',
+    backgroundColor: '#E5E4E2'  
+  },
+  pageName:
+  {
+      color: '#069139',
+      fontWeight: 'bold',
+      fontSize: 22,
+      marginTop: 5,
+      marginBottom: 5,
+      marginLeft:15
+  },
+  searchBar:
+  {
+    width: '95%',
+    alignSelf: 'center',
+    borderWidth: 1,
+    height: 40,
+    borderRadius: 10
+  },
+  nameStyle:
+  {
+    flex: 1,
+  },
+  image: 
+  {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    borderWidth: 2,
+    borderColor: 'black',
+    marginLeft: 8,
+    marginRight: 8
+  },
+  detailsContainer:
+  {
+    flexDirection: 'row', 
+    alignItems: 'center',
+    marginTop: 5,
+    padding: 8,
+    borderTopWidth: 1,
+    width: '95%',
+    alignSelf: 'center'
+  },
+  nameText:
+  {
+    marginTop: 8,
+    fontWeight: 'bold',
+    fontSize: 14
+  },
+  email:
+  {
+    fontSize: 14,
+    marginTop: 5
+  },
+  remove:
+  {
+    marginRight: 15
+  },
+  block:
+  {
+    width: '20%',
+    borderRadius: 5,
+    height: 35,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 3,
+    borderColor: '#ae3127',
+    backgroundColor: '#ae3127'
+  },
+  buttonContainer:
+  {
+    marginTop: 8,
+    flexDirection: 'row',
+    width: '90%',
+    justifyContent: 'space-between',
+    alignSelf: 'center'
+  },
+  allUsers:
+  {
+    width: '45%',
+    borderRadius: 5,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 3,
+    borderColor: '#069139',
+    backgroundColor: '#069139'
+  },
+  blockedUsers:
+  {
+    width: '45%',
+    borderRadius: 5,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 3,
+    borderColor: '#069139',
+    backgroundColor: '#069139'
+  },
+  buttonText:
+  {
+    color: 'white', 
+    fontWeight:'bold'
+  },
+  noContacts:
+  {
+    flex: 1, 
+    justifyContent: 'center', 
+    alignItems: 'center'
+  }
+})
 
 export default Contacts

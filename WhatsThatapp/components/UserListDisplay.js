@@ -1,8 +1,11 @@
 import React, { Component } from 'react';
-import { FlatList, View, ActivityIndicator, Text, TextInput, Button, ScrollView, Image } from 'react-native';
+import { FlatList, View, ActivityIndicator, Text, TextInput, Button, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import { Searchbar } from 'react-native-paper';
+
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
  class UserListDisplay extends Component {
     constructor(props){
@@ -17,7 +20,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
             currentUserId: null,
             // To store users search query
             saveQuery: "",
-            limit: 8,
+            limit: 16,
             offset: 0,
             newUserListData: [],
             blockedData: [],
@@ -221,20 +224,26 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
         );
     }else{
         return(
-            <View>
-                {/* Update saveQuery state with value from input */}
-                {/* Set default value to the current saveQuery state */}
-                <TextInput placeholder = "Search..." onChangeText={saveQuery => this.setState({saveQuery})} defaultValue={this.state.saveQuery}></TextInput>
-                {/* Refreshing list of users when button is pressed */}
-                <Button
-                  title="Search"
-                  onPress={() => {
-                    this.getData();
-                    this.getNextPage();
+            <View style={styles.container}>
+                  <View style={styles.userDetails}>
+                    <TouchableOpacity onPress={() => this.props.navigation.navigate('ContactsScreen')}>
+                      <Ionicons name="arrow-back" size={32} color="black" style={styles.arrow} />
+                    </TouchableOpacity>
+                    <Text style={styles.pageName}>All users</Text>
+                  </View>
+                <Searchbar
+                  style={styles.searchBar}
+                  placeholder="Search..."
+                  onChangeText={saveQuery => {
+                    this.setState({ saveQuery }, () => {
+                      this.getData();
+                      this.getNextPage();
+                    });
                   }}
+                  value={this.state.saveQuery}
+                  inputStyle={{ paddingTop: 0, paddingBottom: 18 }}
                 />
-                <Text>{' '}</Text>
-                <View style={{ height: 630 }}>
+                <View style={{ height: 680 }}>
                   {/* Nested scroll enabled because the flatlist is inside the scrollview */}
                   <ScrollView nestedScrollEnabled={true}>
                     <FlatList
@@ -244,53 +253,46 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
                           // For debugging
                           console.log("item user id:", item.user_id);
                           console.log("current user id:", this.state.currentUserId);
-                          console.log(this.state.contactData.user_id)
                           const matchingContact = this.state.contactData.find((contact) => contact.user_id === item.user_id);
                           const matchingBlocked = this.state.blockedData.find((blocked) => blocked.user_id === item.user_id);
                           if(item.user_id == this.state.currentUserId){
                               return(
-                                  <View>
+                                  <View style={styles.nameContainer}>
                                       {/* Concatenating first name and last name together */}                        
-                                      <Text>{item.given_name + ' ' + item.family_name + "   (You)"}</Text> 
+                                      <Text style={styles.nameText}>{item.given_name + ' ' + item.family_name + "   (You)"}</Text> 
                                       <Text>{item.email}</Text> 
-                                      {/* Empty line inbetween account details*/}
-                                      <Text>{' '}</Text>
                                   </View>
                                   );
                               } else if(matchingContact){
                                 return(
-                                  <View>
+                                  <View style={styles.nameContainer}>
                                       {/* Concatenating first name and last name together */}                        
-                                      <Text>{item.given_name + ' ' + item.family_name}</Text> 
-                                      <Text>{item.email}</Text> 
-                                      <Text>This user is in your contacts</Text>
-                                      {/* Empty line inbetween account details*/}
-                                      <Text>{' '}</Text>
+                                      <Text style={styles.nameText}>{item.given_name + ' ' + item.family_name}</Text> 
+                                      <Text style={styles.email}>{item.email}</Text> 
                                   </View>
                                   );
                               } else if(matchingBlocked){
                                 return(
-                                  <View>
+                                  <View style={styles.nameContainer}>
                                       {/* Concatenating first name and last name together */}                        
-                                      <Text>{item.given_name + ' ' + item.family_name}</Text> 
-                                      <Text>{item.email}</Text> 
-                                      <Text>This user has been blocked</Text>
-                                      {/* Empty line inbetween account details*/}
-                                      <Text>{' '}</Text>
+                                      <Text style={styles.nameText}>{item.given_name + ' ' + item.family_name}</Text> 
+                                      <Text style={styles.email}>{item.email}</Text> 
                                   </View>
                                   );
                               } else{
                                 return(
-                                  <View>
+                                  <View style={styles.buttonContainer}>
+                                    <View style={{flex: '1'}}>
                                       {/* Concatenating first name and last name together */}                        
-                                      <Text>{item.given_name + ' ' + item.family_name}</Text> 
-                                      <Text>{item.email}</Text> 
-                                      <Button
-                                          title="Add to contacts"
-                                          onPress={() => this.addContacts(item.user_id)}
-                                      />
-                                      {/* Empty line inbetween account details*/}
-                                      <Text>{' '}</Text>
+                                      <Text style={styles.nameText}>{item.given_name + ' ' + item.family_name}</Text> 
+                                      <Text style={styles.email}>{item.email}</Text> 
+                                    </View>
+                                    <TouchableOpacity
+                                      onPress={() => {this.addContacts(item.user_id)}}
+                                      style={styles.add}
+                                    >
+                                      <Ionicons name="person-add" size={26} color="black"/>
+                                    </TouchableOpacity>
                                   </View>
                                   );
                               }
@@ -301,34 +303,123 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
                         <View>
                         {console.log(this.state.newUserListData)}
                         {console.log(this.state.offset)}
+                        <View style={styles.offsetContainer}>
                           {/* If the offset is greater than 0 then the button is unhidden so users can't go back before the data starts  */}
                           {this.state.offset > 0 && (
-                            <Button
-                              title="Previous Page"
-                              onPress={() => this.setOffset(this.state.offset - this.state.limit)}
-                            />
+                            <TouchableOpacity style={styles.previousPage} onPress={() => this.setOffset(this.state.offset - this.state.limit)}>
+                              <Ionicons name="arrow-back-circle" size={36} color="black" />
+                            </TouchableOpacity>
                           )}
-                          {this.state.newUserListData.length > 0  && (
-                            <Button
-                              title="Next Page"
-                              onPress={() => this.setOffset(this.state.offset + this.state.limit)}
-                            />
+                          {this.state.offset === 0 && <View style={{ flex: 1 }} />}
+                          {this.state.newUserListData.length > 0 && (
+                            <TouchableOpacity style={styles.nextPage} onPress={() => this.setOffset(this.state.offset + this.state.limit)}>
+                              <Ionicons name="arrow-forward-circle" size={36} color="black" />
+                            </TouchableOpacity>
                           )}
+                        </View>
                         </View>
                       }
                   />
                   </ScrollView>
                 </View>
-                <Text>{' '}</Text>
-                <Button
-                    title="Go back to contacts"
-                    onPress={() => this.props.navigation.navigate('ContactsScreen')}
-                />
             </View>
         );
     }
 
 }
 }
+
+const styles = StyleSheet.create({
+  container: 
+  {
+    flex: 1,
+    borderWidth: 3,
+    margin: 5,
+    borderRadius: 15,
+    borderColor: '#069139',
+    backgroundColor: '#E5E4E2'  
+  },
+  pageName:
+  {
+      color: '#069139',
+      fontWeight: 'bold',
+      fontSize: 22,
+      marginTop: 5,
+      marginBottom: 5,
+      marginLeft:15
+  },
+  searchBar:
+  {
+    width: '95%',
+    alignSelf: 'center',
+    borderWidth: 1,
+    height: 40,
+    borderRadius: 10
+  },
+  buttonContainer:
+  {
+    flexDirection: 'row', 
+    alignItems: 'center',
+    marginTop: 5,
+    padding: 8,
+    borderTopWidth: 1,
+    width: '95%',
+    alignSelf: 'center'
+  },
+  nameContainer:
+  {
+    marginTop: 5,
+    padding: 8,
+    borderTopWidth: 1,
+    width: '95%',
+    marginLeft: 10
+  },
+  userDetails:
+  {
+    marginTop: 8,
+    marginLeft: 10,
+    marginRight: 15,
+    flexDirection: 'row',
+    width: '98%',
+    alignSelf: 'center'
+  },
+  arrow:
+  {
+    marginTop: 3,
+    marginLeft: 8
+  },
+  add:
+  {
+    marginRight: 15
+  },
+  offsetContainer:
+  {
+    padding: 8,
+    borderTopWidth: 1,
+    flexDirection: 'row', 
+    justifyContent: 'space-between',
+    width: '95%',
+    alignSelf: 'center'
+  },
+  nextPage:
+  {
+    marginRight: 15
+  },
+  previousPage:
+  {
+    marginLeft: 15
+  },
+  nameText:
+  {
+    marginTop: 8,
+    fontWeight: 'bold',
+    fontSize: 14
+  },
+  email:
+  {
+    fontSize: 14,
+    marginTop: 5
+  }
+})
 
 export default UserListDisplay

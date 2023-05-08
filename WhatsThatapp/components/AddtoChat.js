@@ -1,7 +1,11 @@
 import React, { Component } from 'react';
-import { FlatList, View, ActivityIndicator, Text, TextInput, Button, ScrollView, Image } from 'react-native';
+import { FlatList, View, ActivityIndicator, Text, TextInput, Button, ScrollView, Image, StyleSheet, TouchableOpacity } from 'react-native';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import { Searchbar } from 'react-native-paper';
+
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 class AddtoChat extends Component {
 
@@ -223,8 +227,13 @@ class AddtoChat extends Component {
         // If data is still being fetched return a loading spinner
         if(this.state.isLoading){
             return(
-                <View>
-                    <ActivityIndicator/>
+                <View style={styles.container}>
+                  <View style={styles.contactDetails}>
+                    <TouchableOpacity onPress={() => this.props.navigation.navigate('ChatDetails')}>
+                      <Ionicons name="arrow-back" size={32} color="black" style={styles.arrow} />
+                    </TouchableOpacity>
+                    <Text style={styles.pageName}>Add members</Text>
+                  </View>
                     {/* Flatlist being used to retrive all the photos based on the user id of the contactData */}
                     {/* This is happening before anything is actually displayed */}
                     <FlatList
@@ -239,20 +248,26 @@ class AddtoChat extends Component {
         }else{
             console.log(this.state.contactData);
             console.log(this.state.currentMembers.members);
-            return(
-                
-                <View>
-                <Button
-                    title="Go back to chat details"
-                    onPress={() => this.props.navigation.navigate('ChatDetails')}
+            return(             
+                <View style={styles.container}>
+                  <View style={styles.contactDetails}>
+                    <TouchableOpacity onPress={() => this.props.navigation.navigate('ChatDetails')}>
+                      <Ionicons name="arrow-back" size={32} color="black" style={styles.arrow} />
+                    </TouchableOpacity>
+                    <Text style={styles.pageName}>Add members</Text>
+                  </View>
+                  <Searchbar
+                  style={styles.searchBar}
+                  placeholder="Search..."
+                  onChangeText={saveQuery => {
+                    this.setState({ saveQuery }, () => {
+                      this.searchContacts();
+                    });
+                  }}
+                  value={this.state.saveQuery}
+                  inputStyle={{ paddingTop: 0, paddingBottom: 18 }}
                 />
-                <TextInput placeholder = "Search..." onChangeText={saveQuery => this.setState({saveQuery})} defaultValue={this.state.saveQuery}></TextInput>
-                {/* Refreshing list of users when button is pressed */}
-                <Button
-                    title="Search"
-                    onPress={() => this.searchContacts()}
-                />
-                <View style={{ height: 600 }}>
+                <View style={{ height: 680 }}>
                   {/* Nested scroll enabled because the flatlist is inside the scrollview */}
                   <ScrollView nestedScrollEnabled={true}>
                     <FlatList
@@ -262,30 +277,31 @@ class AddtoChat extends Component {
                             let currentMemberID = this.state.currentMembers.members.find(member => member.user_id === item.user_id);
                             if(!currentMemberID){
                                 return(
-                                    <View>
+                                    <View style={styles.detailsContainer}>
                                       <Image
                                         source={{uri: this.state.photo[item.user_id]}}
-                                        style={{
-                                          width: 100,
-                                          height: 100
-                                        }}
+                                        style={styles.image}
                                       />
                                         {/*<Text>{JSON.stringify(item)}</Text>*/}
 
                                         {/* Concatenating first name and last name together */}      
-                                        <>
-                                        {this.state.getContacts && <Text>{item.first_name + ' ' + item.last_name}</Text> }
-                                        </>   
-                                        <>
-                                        {this.state.searchCalled && <Text>{item.given_name + ' ' + item.family_name}</Text>  }
-                                        </>                   
-                                        <Text>{item.email}</Text> 
-                                        <Button
-                                          title="Add contact to chat"
-                                          onPress={() => this.addMember(item.user_id)}
-                                        />
-                                        {/* Empty line inbetween account details*/}
-                                        <Text>{' '}</Text>
+                                        <View style= {styles.nameStyle}>
+                                          <>
+                                          {this.state.getContacts && <Text style={styles.nameText}>{item.first_name + ' ' + item.last_name}</Text> }
+                                          </>   
+                                          <>
+                                          {this.state.searchCalled && <Text style={styles.nameText}>{item.given_name + ' ' + item.family_name}</Text>  }
+                                          </>                   
+                                          <Text style={styles.email}>{item.email}</Text> 
+                                          {/* Empty line inbetween account details*/}
+                                          <Text>{' '}</Text>
+                                        </View>  
+                                        <TouchableOpacity
+                                          onPress={() => {this.addMember(item.user_id)}}
+                                          style={styles.add}
+                                        >
+                                          <Ionicons name="person-add" size={26} color="black"/>
+                                        </TouchableOpacity>
                                     </View>
                                 );
                             }else{
@@ -302,6 +318,91 @@ class AddtoChat extends Component {
     
     }
 }
+
+const styles = StyleSheet.create({
+  container: 
+  {
+    flex: 1,
+    borderWidth: 3,
+    margin: 5,
+    borderRadius: 15,
+    borderColor: '#069139',
+    backgroundColor: '#E5E4E2'  
+  },
+  contactDetails:
+  {
+    marginTop: 8,
+    marginLeft: 10,
+    marginRight: 15,
+    flexDirection: 'row',
+    width: '98%',
+    alignSelf: 'center'
+  },
+  arrow:
+  {
+    marginTop: 3,
+    marginLeft: 8
+  },
+  pageName:
+  {
+      color: '#069139',
+      fontWeight: 'bold',
+      fontSize: 22,
+      marginTop: 5,
+      marginBottom: 5,
+      marginLeft:15
+  },
+  searchBar:
+  {
+    width: '95%',
+    alignSelf: 'center',
+    borderWidth: 1,
+    height: 40,
+    borderRadius: 10
+  },
+  nameStyle:
+  {
+    flex: 1,
+  },
+  image: 
+  {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    borderWidth: 2,
+    borderColor: 'black',
+    marginLeft: 8,
+    marginRight: 8
+  },
+  detailsContainer:
+  {
+    flexDirection: 'row', 
+    alignItems: 'center',
+    marginTop: 5,
+    padding: 8,
+    borderTopWidth: 1,
+    width: '95%',
+    alignSelf: 'center'
+  },
+  nameText:
+  {
+    marginTop: 8,
+    fontWeight: 'bold',
+    fontSize: 14
+  },
+  email:
+  {
+    fontSize: 14,
+    marginTop: 5
+  },
+  add:
+  {
+    marginRight: 15,
+    flex: 1,
+    justifyContent: 'center', 
+    alignItems: 'flex-end'
+  }
+})
 
 export default AddtoChat
 

@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
-import { FlatList, View, ActivityIndicator, Text, TextInput, Button, ScrollView, Image } from 'react-native';
+import { FlatList, View, ActivityIndicator, Text, TextInput, Button, ScrollView, Image, StyleSheet, TouchableOpacity } from 'react-native';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 class BlockedUsers extends Component {
 
@@ -42,10 +44,17 @@ class BlockedUsers extends Component {
             }
         })
         .then((responseJson) => {
-            // Updating the contactData state with the retrieved data
+            // Updating the blockedData state with the retrieved data
             this.setState({
                 //isLoading: false,
                 blockedData: responseJson
+              }, () => {
+                // Refresh images 
+                if (this.state.blockedData && this.state.blockedData.length > 0) {
+                    for (let i = 0; i < this.state.blockedData.length; i++) {
+                        this.getImage(this.state.blockedData[i].user_id);
+                    }
+                }
             })
         })
         .catch((error)=> {
@@ -118,8 +127,16 @@ class BlockedUsers extends Component {
         // If data is still being fetched return a loading spinner
         if(this.state.isLoading){
             return(
-                <View>
-                    <Text>No blocked users</Text>
+                <View style={styles.container}>
+                  <View style={styles.blockedDetails}>
+                    <TouchableOpacity onPress={() => this.props.navigation.navigate('ContactsScreen')}>
+                      <Ionicons name="arrow-back" size={32} color="black" style={styles.arrow} />
+                    </TouchableOpacity>
+                    <Text style={styles.pageName}>Blocked users</Text>
+                  </View>
+                  <View style={styles.noBlocked}>
+                      <Text style={{fontSize: 18}}>No blocked users</Text>
+                    </View>
                     {/* Flatlist being used to retrive all the photos based on the user id of the contactData */}
                     {/* This is happening before anything is actually displayed */}
                     <FlatList
@@ -134,28 +151,34 @@ class BlockedUsers extends Component {
         }else{
             console.log(this.state.blockedData);
             return(
-                <View>
-                <View style={{ height: 645 }}>
+                <View style={styles.container}>
+                  <View style={styles.blockedDetails}>
+                    <TouchableOpacity onPress={() => this.props.navigation.navigate('ContactsScreen')}>
+                      <Ionicons name="arrow-back" size={32} color="black" style={styles.arrow} />
+                    </TouchableOpacity>
+                    <Text style={styles.pageName}>Blocked users</Text>
+                  </View>
+                <View style={{ height: 710 }}>
                   {/* Nested scroll enabled because the flatlist is inside the scrollview */}
                   <ScrollView nestedScrollEnabled={true}>
                     <FlatList
                     data={this.state.blockedData}              
                         renderItem= {({item}) => (
-                            <View>
+                            <View style={styles.detailsContainer}>
                               <Image
                                 source={{uri: this.state.photo[item.user_id]}}
-                                style={{
-                                  width: 100,
-                                  height: 100
-                                }}
+                                style={styles.image}
                               />
-                                <Text>{item.first_name + ' ' + item.last_name}</Text>                   
-                                <Text>{item.email}</Text> 
-                                {/* Empty line inbetween account details*/}
-                                <Button
-                                    title="Unblock user"
-                                    onPress={() => this.unblockContact(item.user_id)}
-                                />
+                                <View style= {styles.nameStyle}>
+                                  <Text style={styles.nameText}>{item.first_name + ' ' + item.last_name}</Text>                   
+                                  <Text style={styles.email}>{item.email}</Text> 
+                                </View>
+                                <TouchableOpacity
+                                  onPress={() => {this.unblockContact(item.user_id)}}
+                                  style={styles.block}
+                                >
+                                  <Text style={styles.buttonText}>Unblock</Text>
+                                </TouchableOpacity>
                                 <Text>{' '}</Text>
                             </View>
                             )}
@@ -163,16 +186,103 @@ class BlockedUsers extends Component {
                     />
                     </ScrollView>
                   </View>
-                  <Text>{' '}</Text>
-                  <Button
-                    title="Go back to contacts"
-                    onPress={() => this.props.navigation.navigate('ContactsScreen')}
-                  />
                   </View>
             );
         }
     
     }
 }
+
+const styles = StyleSheet.create({
+  container: 
+  {
+    flex: 1,
+    borderWidth: 3,
+    margin: 5,
+    borderRadius: 15,
+    borderColor: '#069139',
+    backgroundColor: '#E5E4E2'  
+  },
+  pageName:
+  {
+      color: '#069139',
+      fontWeight: 'bold',
+      fontSize: 22,
+      marginTop: 5,
+      marginBottom: 5,
+      marginLeft: 8
+  },
+  image: 
+  {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    borderWidth: 2,
+    borderColor: 'black',
+    marginLeft: 8,
+    marginRight: 8
+  },
+  detailsContainer:
+  {
+    flexDirection: 'row', 
+    alignItems: 'center',
+    marginTop: 5,
+    padding: 8,
+    borderTopWidth: 1,
+    width: '95%',
+    alignSelf: 'center'
+  },
+  nameStyle:
+  {
+    flex: 1,
+  },
+  nameText:
+  {
+    marginTop: 8,
+    fontWeight: 'bold',
+    fontSize: 14
+  },
+  email:
+  {
+    fontSize: 14,
+    marginTop: 5
+  },
+  buttonText:
+  {
+    color: 'white', 
+    fontWeight:'bold'
+  },
+  block:
+  {
+    width: '20%',
+    borderRadius: 5,
+    height: 35,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 3,
+    borderColor: '#ae3127',
+    backgroundColor: '#ae3127'
+  },
+  blockedDetails:
+  {
+    marginTop: 8,
+    marginLeft: 10,
+    marginRight: 15,
+    flexDirection: 'row',
+    width: '98%',
+    alignSelf: 'center'
+  },
+  arrow:
+  {
+    marginTop: 3,
+    marginLeft: 8
+  },
+  noBlocked:
+  {
+    flex: 1, 
+    justifyContent: 'center', 
+    alignItems: 'center'
+  }
+})
 
 export default BlockedUsers

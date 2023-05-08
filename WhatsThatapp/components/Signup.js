@@ -254,7 +254,7 @@ class Signup extends Component {
           {this.state.error && <Text style = {styles.errorMessage}>{this.state.error}</Text>}
           </>
           <TouchableOpacity style = {styles.loginNav} onPress={() => this.props.navigation.navigate('Login')}>
-            <Text style = {styles.loginNavText} >Click here to go to login</Text>
+            <Text style = {styles.loginNavText} >Click here to login</Text>
           </TouchableOpacity>
         </View>
         <Modal

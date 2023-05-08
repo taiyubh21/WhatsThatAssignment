@@ -134,12 +134,12 @@ class Chats extends Component {
                         <TextInput style = {styles.textInput} placeholder = "New chat name..." onChangeText={chatname => this.setState({chatname})} value={this.state.chatname}></TextInput>
                         {/* Output error if there is an error */}
                         <>
-                            {this.state.error && <Text>{this.state.error}</Text>}
+                            {this.state.error && <Text style={styles.errorMessage}>{this.state.error}</Text>}
                         </>
                         <TouchableOpacity  style= {styles.createChatButton} onPress={() => {
                             this.onPressButton();
                         }}>
-                            <Text style ={styles.createChatText} >Create new chat</Text>
+                            <Text style={styles.createChatText} >Create new chat</Text>
                         </TouchableOpacity>
                     </View>
                     <Text>{' '}</Text>
@@ -283,6 +283,10 @@ const styles = StyleSheet.create({
         borderTopWidth: 1,
         width: '95%',
         alignSelf: 'center'
+    },
+    errorMessage:
+    {
+      color: 'red'
     },
     messages:
     {

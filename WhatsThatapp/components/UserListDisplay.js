@@ -12,15 +12,10 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 class UserListDisplay extends Component {
   constructor(props) {
     super(props);
-    // Initialising states
     this.state = {
-      // Used for loading icon
       isLoading: true,
-      // For array of user data
       userListData: [],
-      // For holding the ID of current user
       currentUserId: null,
-      // To store users search query
       saveQuery: '',
       limit: 16,
       offset: 0,
@@ -37,13 +32,11 @@ class UserListDisplay extends Component {
     this.getContacts();
     this.getBlocked();
     this.resetData = this.props.navigation.addListener('focus', () => {
-      // Reset states back to how they were
       this.setState({
         isLoading: true,
         userListData: [],
         saveQuery: '',
       }, () => {
-        // Call getData after resetting the state
         this.getData();
         this.getNextPage();
         this.getContacts();

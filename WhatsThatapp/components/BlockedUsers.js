@@ -44,7 +44,6 @@ class BlockedUsers extends Component {
         throw new Error('error');
       })
       .then((responseJson) => {
-        // Updating the blockedData state with the retrieved data
         this.setState({
           blockedData: responseJson,
         }, () => {
@@ -107,9 +106,7 @@ class BlockedUsers extends Component {
         if (response.status === 200) {
           console.log('Contact unblocked successfully');
           this.getData();
-          // Else if its bad then throw an error
         } else {
-          // Output error on screen for other responses
           throw new Error('error');
         }
       })
@@ -119,7 +116,6 @@ class BlockedUsers extends Component {
   }
 
   render() {
-    // If data is still being fetched return a loading spinner
     if (this.state.isLoading) {
       return (
         <View style={styles.container}>

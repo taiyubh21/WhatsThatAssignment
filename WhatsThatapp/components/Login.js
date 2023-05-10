@@ -3,9 +3,7 @@ import {
   Text, TextInput, View, TouchableOpacity, StyleSheet,
 } from 'react-native';
 
-// Import to handle email validation
 import * as EmailValidator from 'email-validator';
-// Import AsyncStorage for storing user ID and session token
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 class Login extends Component {
@@ -59,7 +57,7 @@ class Login extends Component {
       this.setState({
         errorTimer: setTimeout(() => {
           this.setState({ error: null, errorTimer: null });
-        }, 5000),
+        }, 3000),
       });
       return;
     }
@@ -69,7 +67,7 @@ class Login extends Component {
       this.setState({
         emailTimer: setTimeout(() => {
           this.setState({ emailError: null, emailTimer: null });
-        }, 5000),
+        }, 3000),
       });
       return;
     }
@@ -79,7 +77,7 @@ class Login extends Component {
       this.setState({
         passwordTimer: setTimeout(() => {
           this.setState({ passwordError: null, passwordTimer: null });
-        }, 5000),
+        }, 3000),
       });
       return;
     }
@@ -92,7 +90,7 @@ class Login extends Component {
       this.setState({
         errorTimer: setTimeout(() => {
           this.setState({ error: null, errorTimer: null });
-        }, 5000),
+        }, 3000),
       });
       return;
     }
@@ -105,7 +103,7 @@ class Login extends Component {
       this.setState({
         errorTimer: setTimeout(() => {
           this.setState({ error: null, errorTimer: null });
-        }, 5000),
+        }, 3000),
       });
       return;
     }
@@ -159,11 +157,11 @@ class Login extends Component {
         console.log(error);
         this.setState({ error });
         this.setState({ submitted: false });
-        // Error message will disappear after 5 seconds
+        // Error message will disappear after 3 seconds
         this.setState({
           errorTimer: setTimeout(() => {
             this.setState({ error: null, errorTimer: null });
-          }, 5000),
+          }, 3000),
         });
       });
   }

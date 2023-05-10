@@ -67,7 +67,7 @@ class ProfileUpdate extends Component {
         this.setState({
           errorTimer: setTimeout(() => {
             this.setState({ error: null, errorTimer: null });
-          }, 5000),
+          }, 3000),
         });
         return;
       }
@@ -81,7 +81,7 @@ class ProfileUpdate extends Component {
         this.setState({
           errorTimer: setTimeout(() => {
             this.setState({ error: null, errorTimer: null });
-          }, 5000),
+          }, 3000),
         });
         return;
       }
@@ -93,7 +93,7 @@ class ProfileUpdate extends Component {
         this.setState({
           errorTimer: setTimeout(() => {
             this.setState({ error: null, errorTimer: null });
-          }, 5000),
+          }, 3000),
         });
         return;
       }
@@ -107,7 +107,7 @@ class ProfileUpdate extends Component {
         this.setState({
           errorTimer: setTimeout(() => {
             this.setState({ error: null, errorTimer: null });
-          }, 5000),
+          }, 3000),
         });
         return;
       }
@@ -236,11 +236,11 @@ class ProfileUpdate extends Component {
         console.log(error);
         this.setState({ error: 'error' });
         this.setState({ submitted: false });
-        // Error message will disappear after 5 seconds
+        // Error message will disappear after 3 seconds
         this.setState({
           errorTimer: setTimeout(() => {
             this.setState({ error: null, errorTimer: null });
-          }, 5000),
+          }, 3000),
         });
       });
   }

@@ -23,7 +23,6 @@ class ConversationDisplay extends Component {
       submitted: false,
       sendMessage: '',
       errorTimer: null,
-      messageTimer: null,
     };
     this.setCurrentUserId();
     this.setChatId();
@@ -56,7 +55,7 @@ class ConversationDisplay extends Component {
       this.setState({
         errorTimer: setTimeout(() => {
           this.setState({ error: null, errorTimer: null });
-        }, 5000),
+        }, 3000),
       });
       return;
     }
@@ -184,7 +183,7 @@ class ConversationDisplay extends Component {
         this.setState({
           errorTimer: setTimeout(() => {
             this.setState({ error: null, errorTimer: null });
-          }, 5000),
+          }, 3000),
         });
       });
   }
@@ -221,7 +220,7 @@ class ConversationDisplay extends Component {
         this.setState({
           errorTimer: setTimeout(() => {
             this.setState({ error: null, errorTimer: null });
-          }, 5000),
+          }, 3000),
         });
       });
   }

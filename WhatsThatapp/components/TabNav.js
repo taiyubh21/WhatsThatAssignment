@@ -40,18 +40,18 @@ export default class TabNav extends Component {
   render() {
     return (
     // Hide navigation headers on the app
-    // Making the contacts page the default initial page shown*
+    // Making the chats page the default initial page shown*
       <Tab.Navigator
-        initialRouteName="Contacts"
+        initialRouteName="Chats"
         screenOptions={({ route }) => ({
           headerShown: false,
           // eslint-disable-next-line react/no-unstable-nested-components
           tabBarIcon: ({ color, size }) => {
             let iconName;
-            if (route.name === 'Contacts') {
-              iconName = 'people';
-            } else if (route.name === 'Chats') {
+            if (route.name === 'Chats') {
               iconName = 'chatbubbles';
+            } else if (route.name === 'Contacts') {
+              iconName = 'people';
             } else if (route.name === 'User Profile') {
               iconName = 'person';
             } else if (route.name === 'Logout') {
@@ -65,8 +65,8 @@ export default class TabNav extends Component {
         })}
       >
         {/* The screens in the tab navigation */}
-        <Tab.Screen name="Contacts" component={ContactNav} />
         <Tab.Screen name="Chats" component={ChatNav} />
+        <Tab.Screen name="Contacts" component={ContactNav} />
         <Tab.Screen name="User Profile" component={CamNav} />
         <Tab.Screen name="Logout" component={Logout} />
       </Tab.Navigator>

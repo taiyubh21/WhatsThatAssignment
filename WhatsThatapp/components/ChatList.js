@@ -8,11 +8,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 class Chats extends Component {
   constructor(props) {
     super(props);
-    // Initialising states
     this.state = {
-      // Used for loading icon
       isLoading: true,
-      // For array of contact data
       chatData: [],
       chatname: '',
       error: '',
@@ -43,7 +40,7 @@ class Chats extends Component {
       this.setState({
         errorTimer: setTimeout(() => {
           this.setState({ error: null, errorTimer: null });
-        }, 5000),
+        }, 3000),
       });
       return;
     }

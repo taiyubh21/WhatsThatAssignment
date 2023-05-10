@@ -12,13 +12,9 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 class Contacts extends Component {
   constructor(props) {
     super(props);
-    // Initialising states
     this.state = {
-      // Used for loading icon
       isLoading: true,
-      // For array of contact data
       contactData: [],
-      // To store users search query
       saveQuery: '',
       getContacts: false,
       searchCalled: false,
@@ -33,13 +29,11 @@ class Contacts extends Component {
     this.getData();
     this.searchContacts();
     this.resetData = this.props.navigation.addListener('focus', () => {
-      // Reset states back to how they were
       this.setState({
         isLoading: true,
         contactData: [],
         saveQuery: '',
       }, () => {
-        // Call getData after resetting the state
         this.getData();
         this.searchContacts();
       });
@@ -72,14 +66,11 @@ class Contacts extends Component {
         throw new Error('error');
       })
       .then((responseJson) => {
-        // Updating the contactData state with the retrieved data
         this.setState({
-          // isLoading: false,
           contactData: responseJson,
           getContacts: true,
           searchCalled: false,
         }, () => {
-          // Refresh images
           if (this.state.contactData && this.state.contactData.length > 0) {
             for (let i = 0; i < this.state.contactData.length; i += 1) {
               this.getImage(this.state.contactData[i].user_id);
@@ -139,9 +130,7 @@ class Contacts extends Component {
         throw new Error('error');
       })
       .then((responseJson) => {
-        // Updating the contactData state with the retrieved data
         this.setState({
-          // isLoading: false,
           contactData: responseJson,
           searchCalled: true,
           getContacts: false,
@@ -186,7 +175,6 @@ class Contacts extends Component {
       },
     )
       .then((response) => {
-        // If the response is ok
         if (response.status === 200) {
           console.log('User blocked successfully');
           this.getData();
@@ -261,8 +249,6 @@ class Contacts extends Component {
                     source={{ uri: this.state.photo[item.user_id] }}
                     style={styles.image}
                   />
-                  {/* <Text>{JSON.stringify(item)}</Text> */}
-                  {/* Concatenating first name and last name together */}
                   <View style={styles.nameStyle}>
                     {/* eslint-disable-next-line react/jsx-no-useless-fragment */}
                     <>
@@ -273,7 +259,6 @@ class Contacts extends Component {
                       {this.state.searchCalled && <Text style={styles.nameText}>{`${item.given_name} ${item.family_name}`}</Text> }
                     </>
                     <Text style={styles.email}>{item.email}</Text>
-                    {/* Empty line inbetween account details */}
                     <Text>{' '}</Text>
                   </View>
                   <TouchableOpacity

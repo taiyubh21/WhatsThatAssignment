@@ -46,15 +46,12 @@ class ChatDetails extends Component {
   onPressButton() {
     this.setState({ submitted: true });
     this.setState({ error: '' });
-    // If inputs aren't valid according to the validation error message will return
-    // If inputs are null no need for validation
-    // Checks with the email validator if the email is valid
     if (this.state.chatname === '') {
       this.setState({ error: 'Chat must have a name' });
       this.setState({
         errorTimer: setTimeout(() => {
           this.setState({ error: null, errorTimer: null });
-        }, 5000),
+        }, 3000),
       });
       return;
     }
@@ -95,7 +92,6 @@ class ChatDetails extends Component {
       })
       .then((responseJson) => {
         this.setState({
-          // isLoading: false,
           chatData: responseJson,
         }, () => {
           if (this.state.chatData.members && this.state.chatData.members.length > 0) {
@@ -181,7 +177,7 @@ class ChatDetails extends Component {
         this.setState({
           errorTimer: setTimeout(() => {
             this.setState({ error: null, errorTimer: null });
-          }, 5000),
+          }, 3000),
         });
       });
   }

@@ -34,13 +34,11 @@ class AddtoChat extends Component {
       .then(() => this.searchContacts())
       .catch((error) => console.log(error));
     this.resetData = this.props.navigation.addListener('focus', () => {
-      // Reset states back to how they were
       this.setState({
         isLoading: true,
         contactData: [],
         saveQuery: '',
       }, () => {
-        // Call getData after resetting the state
         this.setChatId()
           .then(() => this.getMembers())
           .then(() => this.getData())
@@ -81,13 +79,11 @@ class AddtoChat extends Component {
         throw new Error('error');
       })
       .then((responseJson) => {
-        // Updating the contactData state with the retrieved data
         this.setState({
           contactData: responseJson,
           getContacts: true,
           searchCalled: false,
         }, () => {
-          // Refresh images
           if (this.state.contactData && this.state.contactData.length > 0) {
             for (let i = 0; i < this.state.contactData.length; i += 1) {
               this.getImage(this.state.contactData[i].user_id);
@@ -172,7 +168,6 @@ class AddtoChat extends Component {
         throw new Error('error');
       })
       .then((responseJson) => {
-        // Updating the contactData state with the retrieved data
         this.setState({
           isLoading: false,
           contactData: responseJson,
@@ -200,7 +195,6 @@ class AddtoChat extends Component {
           console.log('Contact has been added to chat successfully');
           this.getMembers();
           this.getData();
-          // Else if its bad then throw an error
         } else {
           throw new Error('error');
         }
@@ -211,7 +205,6 @@ class AddtoChat extends Component {
   }
 
   render() {
-    // If data is still being fetched return a loading spinner
     if (this.state.isLoading) {
       return (
         <View style={styles.container}>

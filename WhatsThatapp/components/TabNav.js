@@ -1,11 +1,9 @@
 import React, { Component } from 'react';
-import { View } from 'react-native';
 
 // Tab navigation for App inside stack navigation
 
 // Importing navigation components from the libraries
-// Navigation container not in use since its second navigator in the hierarchy 
-import { NavigationContainer } from '@react-navigation/native';
+// Navigation container not in use since its second navigator in the hierarchy
 
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
@@ -22,32 +20,32 @@ import Logout from './Logout';
 const Tab = createBottomTabNavigator();
 
 export default class TabNav extends Component {
-
-  componentDidMount(){
+  componentDidMount() {
     this.unsubscribe = this.props.navigation.addListener('focus', () => {
       this.checkLoggedIn();
     });
   }
 
-  componentWillUnmount(){
+  componentWillUnmount() {
     this.unsubscribe();
   }
 
   checkLoggedIn = async () => {
-    const value = await AsyncStorage.getItem("whatsthat_session_token");
-    if(value == null){
+    const value = await AsyncStorage.getItem('whatsthat_session_token');
+    if (value == null) {
       this.props.navigation.navigate('Login');
     }
-  }
+  };
 
-  render(){
-    return(
-        // Hide navigation headers on the app
-        // Making the contacts page the default initial page shown*
-        <Tab.Navigator
-        initialRouteName='Contacts'
+  render() {
+    return (
+    // Hide navigation headers on the app
+    // Making the contacts page the default initial page shown*
+      <Tab.Navigator
+        initialRouteName="Contacts"
         screenOptions={({ route }) => ({
           headerShown: false,
+          // eslint-disable-next-line react/no-unstable-nested-components
           tabBarIcon: ({ color, size }) => {
             let iconName;
             if (route.name === 'Contacts') {
@@ -59,20 +57,19 @@ export default class TabNav extends Component {
             } else if (route.name === 'Logout') {
               iconName = 'log-out';
             }
-  
+
             return <Ionicons name={iconName} size={size} color={color} />;
           },
-            tabBarActiveTintColor: '#069139',
-            tabBarInactiveTintColor: 'gray',
+          tabBarActiveTintColor: '#069139',
+          tabBarInactiveTintColor: 'gray',
         })}
       >
-          {/* The screens in the tab navigation*/}
-          <Tab.Screen name = 'Contacts' component={ContactNav} />
-          <Tab.Screen name = 'Chats' component={ChatNav} />
-          <Tab.Screen name = 'User Profile' component={CamNav} />
-          <Tab.Screen name = 'Logout' component={Logout} />          
-        </Tab.Navigator>
+        {/* The screens in the tab navigation */}
+        <Tab.Screen name="Contacts" component={ContactNav} />
+        <Tab.Screen name="Chats" component={ChatNav} />
+        <Tab.Screen name="User Profile" component={CamNav} />
+        <Tab.Screen name="Logout" component={Logout} />
+      </Tab.Navigator>
     );
-
-}
+  }
 }

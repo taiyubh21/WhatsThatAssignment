@@ -1,266 +1,295 @@
 import React, { Component } from 'react';
-import { Text, TextInput, View, TouchableOpacity, StyleSheet, Modal} from 'react-native';
+import {
+  Text, TextInput, View, TouchableOpacity, StyleSheet, Modal,
+} from 'react-native';
 
 // Import to handle email validation
 import * as EmailValidator from 'email-validator';
 
 class Signup extends Component {
-  constructor(props){
+  constructor(props) {
     super(props);
-
-    // Initialising state variables
     this.state = {
-      firstname: "",
-      lastname: "",
-      email: "",
-      password: "",
-      // Error message for failed validation
-      error: "",
-      // Checks if submission has happened or not
+      firstname: '',
+      lastname: '',
+      email: '',
+      password: '',
+      error: '',
       submitted: false,
       errorTimer: null,
-      firstnameError: "",
-      lastnameError: "",
-      emailError: "",
-      passwordError: "",
+      firstnameError: '',
+      lastnameError: '',
+      emailError: '',
+      passwordError: '',
       firstnameTimer: null,
       lastnameTimer: null,
       emailTimer: null,
       passwordTimer: null,
       modalVisible: false,
-      loginTimer: null
-    }
+      loginTimer: null,
+    };
     // Binding to onPressButton function
-    this.onPressButton = this.onPressButton.bind(this)
+    this.onPressButton = this.onPressButton.bind(this);
   }
 
-  //Adding user - interacting with the API
-  addUser(){
-    return fetch("http://localhost:3333/api/1.0.0/user",
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      // Creating JSON with the user data
-      body: JSON.stringify({
-        first_name: this.state.firstname,
-        last_name: this.state.lastname,
-        email: this.state.email,
-        password: this.state.password
-      })
-    })
-    // Handles API response
-    // Checks if it is a success and user was created or if there is an error
-    .then((response) => {
-      if(response.status === 201){
-        return response.json();
-      }else if(response.status === 400){
-        throw "Email already exists. Please try again"
-      }else if(response.status === 500){
-        throw "Something went wrong"
-      }
-    })
-    .then((rjson) => {
-      console.log(rjson)
-      this.setState({submitted: false})
-      console.log("Successful login")
-      // Display the success modal for a few seconds
-      this.setState({ modalVisible: true });
-      // Close modal and navigate to login screen after 4 seconds
-      this.setState({loginTimer: setTimeout(() => {
-        this.setState({loginTimer: null, modalVisible: false });
-        this.props.navigation.navigate('Login');
-      }, 4000)})
-    })
-    .catch((error) => {
-      console.log(error)
-      this.setState({"error": error})
-      this.setState({"submitted": false})
-      // Error message will disappear after 5 seconds
-      this.setState({errorTimer: setTimeout(() => {
-        this.setState({error: null, errorTimer: null})
-      }, 5000)})
+  componentDidMount() {
+    this.unsubscribe = this.props.navigation.addListener('focus', () => {
+      this.setState({
+        firstname: '',
+        lastname: '',
+        email: '',
+        password: '',
+      });
     });
   }
 
+  componentWillUnmount() {
+    this.unsubscribe();
+    // Cleaning up all the timers
+    if (this.state.errorTimer) {
+      clearTimeout(this.state.errorTimer);
+    }
+    if (this.state.firstnameTimer) {
+      clearTimeout(this.state.firstnameTimer);
+    }
+    if (this.state.lastnameTimer) {
+      clearTimeout(this.state.lastnameTimer);
+    }
+    if (this.state.passwordTimer) {
+      clearTimeout(this.state.passwordTimer);
+    }
+    if (this.state.emailTimer) {
+      clearTimeout(this.state.emailTimer);
+    }
+    if (this.state.loginTimer) {
+      clearTimeout(this.state.loginTimer);
+    }
+  }
+
   // For input validation
-  onPressButton(){
-    this.setState({submitted: true})
-    this.setState({error: ""})
+  onPressButton() {
+    this.setState({ submitted: true });
+    this.setState({ error: '' });
 
     // Checks if all the input fields are filled in
-    if(!this.state.firstname && !this.state.lastname && !this.state.email && !this.state.password){
-      this.setState({error: "Must enter first name, last name, email and password"})
-      this.setState({errorTimer: setTimeout(() => {
-        this.setState({error: null, errorTimer: null})
-      }, 5000)})
-      return;    
+    // eslint-disable-next-line max-len
+    if (!this.state.firstname && !this.state.lastname && !this.state.email && !this.state.password) {
+      this.setState({ error: 'Must enter first name, last name, email and password' });
+      this.setState({
+        errorTimer: setTimeout(() => {
+          this.setState({ error: null, errorTimer: null });
+        }, 5000),
+      });
+      return;
     }
 
     if (!this.state.firstname) {
-      this.setState({firstnameError: "*A first name is required"});
-      this.setState({firstnameTimer: setTimeout(() => {
-        this.setState({firstnameError: null, firstnameTimer: null})
-      }, 5000)})
+      this.setState({ firstnameError: '*A first name is required' });
+      this.setState({
+        firstnameTimer: setTimeout(() => {
+          this.setState({ firstnameError: null, firstnameTimer: null });
+        }, 5000),
+      });
       return;
     }
 
     if (!this.state.lastname) {
-      this.setState({lastnameError: "*A last name is required"});
-      this.setState({lastnameTimer: setTimeout(() => {
-        this.setState({lastnameError: null, lastnameTimer: null})
-      }, 5000)})
+      this.setState({ lastnameError: '*A last name is required' });
+      this.setState({
+        lastnameTimer: setTimeout(() => {
+          this.setState({ lastnameError: null, lastnameTimer: null });
+        }, 5000),
+      });
       return;
     }
 
     if (!this.state.email) {
-      this.setState({emailError: "*Email is required"});
-      this.setState({emailTimer: setTimeout(() => {
-        this.setState({emailError: null, emailTimer: null})
-      }, 5000)})
+      this.setState({ emailError: '*Email is required' });
+      this.setState({
+        emailTimer: setTimeout(() => {
+          this.setState({ emailError: null, emailTimer: null });
+        }, 5000),
+      });
       return;
     }
 
     if (!this.state.password) {
-      this.setState({passwordError: "*Password is required"});
-      this.setState({passwordTimer: setTimeout(() => {
-        this.setState({passwordError: null, passwordTimer: null})
-      }, 5000)})
+      this.setState({ passwordError: '*Password is required' });
+      this.setState({
+        passwordTimer: setTimeout(() => {
+          this.setState({ passwordError: null, passwordTimer: null });
+        }, 5000),
+      });
       return;
     }
-
     // If inputs aren't valid according to the validation error message will return
 
     // Checks with the email validator if the email is valid
-    if(!EmailValidator.validate(this.state.email)){
-      this.setState({error: "Must enter valid email"})
-      this.setState({errorTimer: setTimeout(() => {
-        this.setState({error: null, errorTimer: null})
-      }, 5000)})
+    if (!EmailValidator.validate(this.state.email)) {
+      this.setState({ error: 'Must enter valid email' });
+      this.setState({
+        errorTimer: setTimeout(() => {
+          this.setState({ error: null, errorTimer: null });
+        }, 5000),
+      });
       return;
     }
 
     // Reg Ex to validate first and last name
-    const NAME_REGEX = new RegExp("^[A-Z][A-Za-z]+$")
+    const NAME_REGEX = /^[A-Z][A-Za-z]+$/;
 
     // Check if first name is valid
-    if(!NAME_REGEX.test(this.state.firstname)){
-      this.setState({error: "First name must start with capital letter and have no spaces, numbers or symbols"})
-      this.setState({errorTimer: setTimeout(() => {
-        this.setState({error: null, errorTimer: null})
-      }, 5000)})
+    if (!NAME_REGEX.test(this.state.firstname)) {
+      this.setState({ error: 'First name must start with capital letter and have no spaces, numbers or symbols' });
+      this.setState({
+        errorTimer: setTimeout(() => {
+          this.setState({ error: null, errorTimer: null });
+        }, 5000),
+      });
       return;
     }
 
     // Check if last name is valid
-    if(!NAME_REGEX.test(this.state.lastname)){
-      this.setState({error: "Last name must start with capital letter and have no spaces, numbers or symbols"})
-      this.setState({errorTimer: setTimeout(() => {
-        this.setState({error: null, errorTimer: null})
-      }, 5000)})
+    if (!NAME_REGEX.test(this.state.lastname)) {
+      this.setState({ error: 'Last name must start with capital letter and have no spaces, numbers or symbols' });
+      this.setState({
+        errorTimer: setTimeout(() => {
+          this.setState({ error: null, errorTimer: null });
+        }, 5000),
+      });
       return;
     }
 
     // Reg Ex to validate password
-    const PASSWORD_REGEX = new RegExp("^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$")
+    const PASSWORD_REGEX = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/;
     // Check if password is valid
-    if(!PASSWORD_REGEX.test(this.state.password)){
-            this.setState({error: "Password isn't strong enough (One upper, one lower, one special, one number, at least 8 characters long)"})
-            return;
-          }   
-    
+    if (!PASSWORD_REGEX.test(this.state.password)) {
+      this.setState({ error: "Password isn't strong enough (One upper, one lower, one special, one number, at least 8 characters long)" });
+      return;
+    }
+
     // If all validation is successful all the addUser to make a POST request to the server
-    this.addUser()
+    this.addUser();
   }
 
-  componentDidMount(){
-    this.unsubscribe = this.props.navigation.addListener('focus', () => {
-      this.setState({
-        firstname: "",
-        lastname: "",
-        email: "",
-        password: ""
+  // Adding user - interacting with the API
+  addUser() {
+    return fetch(
+      'http://localhost:3333/api/1.0.0/user',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        // Creating JSON with the user data
+        body: JSON.stringify({
+          first_name: this.state.firstname,
+          last_name: this.state.lastname,
+          email: this.state.email,
+          password: this.state.password,
+        }),
+      },
+    )
+    // Handles API response
+    // Checks if it is a success and user was created or if there is an error
+      .then((response) => {
+        if (response.status === 201) {
+          return response.json();
+        } if (response.status === 400) {
+          throw new Error('Email already exists. Please try again');
+        } else if (response.status === 500) {
+          throw new Error('Something went wrong');
+        }
+        return null;
       })
-    });
+      .then((rjson) => {
+        console.log(rjson);
+        this.setState({ submitted: false });
+        console.log('Successful login');
+        // Display the success modal for a few seconds
+        this.setState({ modalVisible: true });
+        // Close modal and navigate to login screen after 4 seconds
+        this.setState({
+          loginTimer: setTimeout(() => {
+            this.setState({ loginTimer: null, modalVisible: false });
+            this.props.navigation.navigate('Login');
+          }, 4000),
+        });
+      })
+      .catch((error) => {
+        console.log(error);
+        this.setState({ error });
+        this.setState({ submitted: false });
+        // Error message will disappear after 5 seconds
+        this.setState({
+          errorTimer: setTimeout(() => {
+            this.setState({ error: null, errorTimer: null });
+          }, 5000),
+        });
+      });
   }
-
-  componentWillUnmount(){
-    this.unsubscribe();
-    // Cleaning up all the timers
-    if(this.state.errorTimer){
-      clearTimeout(this.state.errorTimer) 
-    }
-    if(this.state.firstnameTimer){
-      clearTimeout(this.state.firstnameTimer) 
-    }
-    if(this.state.lastnameTimer){
-      clearTimeout(this.state.lastnameTimer) 
-    }
-    if(this.state.passwordTimer){
-      clearTimeout(this.state.passwordTimer) 
-    }
-    if(this.state.emailTimer){
-      clearTimeout(this.state.emailTimer) 
-    }
-    if(this.state.loginTimer){
-      clearTimeout(this.state.loginTimer) 
-    }
-  }
-
 
   render() {
     return (
-      <View style = {styles.container}>
-        <View style = {styles.logo}>
-          <Text style = {styles.logoText} >Whats</Text>
-          <Text style = {styles.logoText} >That?</Text>
+      <View style={styles.container}>
+        <View style={styles.logo}>
+          <Text style={styles.logoText}>Whats</Text>
+          <Text style={styles.logoText}>That?</Text>
         </View>
-        <View style = {styles.form}>
+        <View style={styles.form}>
           {/* Update firstname state with value from input */}
           {/* Set default value to the current firstname state */}
-          <TextInput style = {styles.textInput} placeholder = "First name..." onChangeText={firstname => this.setState({firstname})} value={this.state.firstname}></TextInput>
+          <TextInput style={styles.textInput} placeholder="First name..." onChangeText={(firstname) => this.setState({ firstname })} value={this.state.firstname} />
           {/* If submitted and first name input is empty then display error message */}
+          {/* eslint-disable-next-line react/jsx-no-useless-fragment */}
           <>
-          {this.state.firstnameError && <Text style = {styles.errorMessage}>{this.state.firstnameError}</Text>}
+            {/* eslint-disable-next-line max-len */}
+            {this.state.firstnameError && <Text style={styles.errorMessage}>{this.state.firstnameError}</Text>}
           </>
           {/* Update lastname state with value from input */}
           {/* Set default value to the current lastname state */}
-          <TextInput style = {styles.textInput} placeholder = "Last name..." onChangeText={lastname => this.setState({lastname})} value={this.state.lastname}></TextInput>
+          <TextInput style={styles.textInput} placeholder="Last name..." onChangeText={(lastname) => this.setState({ lastname })} value={this.state.lastname} />
           {/* If submitted and last name input is empty then display error message */}
+          {/* eslint-disable-next-line react/jsx-no-useless-fragment */}
           <>
-          {this.state.lastnameError && <Text style = {styles.errorMessage}>{this.state.lastnameError}</Text>}
+            {/* eslint-disable-next-line max-len */}
+            {this.state.lastnameError && <Text style={styles.errorMessage}>{this.state.lastnameError}</Text>}
           </>
           {/* Update email state with value from input */}
           {/* Set default value to the current email state */}
-          <TextInput style = {styles.textInput} placeholder = "Email..." onChangeText={email => this.setState({email})} value={this.state.email}></TextInput>
+          <TextInput style={styles.textInput} placeholder="Email..." onChangeText={(email) => this.setState({ email })} value={this.state.email} />
           {/* If submitted and email input is empty then display error message */}
+          {/* eslint-disable-next-line react/jsx-no-useless-fragment */}
           <>
-          {this.state.emailError && <Text style = {styles.errorMessage}>{this.state.emailError}</Text>}
+            {/* eslint-disable-next-line max-len */}
+            {this.state.emailError && <Text style={styles.errorMessage}>{this.state.emailError}</Text>}
           </>
           {/* Update password state with value from input */}
           {/* Set default value to the current password state */}
           {/* Secure text entry to hide password text */}
-          <TextInput style = {styles.textInput} placeholder = "Password..." onChangeText={password => this.setState({password})} value={this.state.password} secureTextEntry={true}></TextInput>
+          <TextInput style={styles.textInput} placeholder="Password..." onChangeText={(password) => this.setState({ password })} value={this.state.password} secureTextEntry />
           {/* If submitted and password input is empty then display error message */}
+          {/* eslint-disable-next-line react/jsx-no-useless-fragment */}
           <>
-          {this.state.passwordError && <Text style = {styles.errorMessage}>{this.state.passwordError}</Text>}
+            {/* eslint-disable-next-line max-len */}
+            {this.state.passwordError && <Text style={styles.errorMessage}>{this.state.passwordError}</Text>}
           </>
           {/* Sign up button */}
-          <TouchableOpacity style = {styles.signupButton} onPress={this.onPressButton}>
-            <Text style = {styles.signupText} >Sign up</Text>
+          <TouchableOpacity style={styles.signupButton} onPress={this.onPressButton}>
+            <Text style={styles.signupText}>Sign up</Text>
           </TouchableOpacity>
           <Text>{' '}</Text>
           {/* Output error if there is an error */}
+          {/* eslint-disable-next-line react/jsx-no-useless-fragment */}
           <>
-          {this.state.error && <Text style = {styles.errorMessage}>{this.state.error}</Text>}
+            {this.state.error && <Text style={styles.errorMessage}>{this.state.error}</Text>}
           </>
-          <TouchableOpacity style = {styles.loginNav} onPress={() => this.props.navigation.navigate('Login')}>
-            <Text style = {styles.loginNavText} >Click here to login</Text>
+          <TouchableOpacity style={styles.loginNav} onPress={() => this.props.navigation.navigate('Login')}>
+            <Text style={styles.loginNavText}>Click here to login</Text>
           </TouchableOpacity>
         </View>
         <Modal
           visible={this.state.modalVisible}
-          animationType='slide'
-          transparent={true}
+          animationType="slide"
+          transparent
         >
           <View style={styles.modalContainer}>
             <View style={styles.modalStyle}>
@@ -271,16 +300,15 @@ class Signup extends Component {
       </View>
     );
   }
-
 }
 
 const styles = StyleSheet.create({
-  container: 
+  container:
   {
     flex: 1,
-    backgroundColor: '#E5E4E2'    
+    backgroundColor: '#E5E4E2',
   },
-  logo: 
+  logo:
   {
     width: '40%',
     marginTop: 150,
@@ -292,18 +320,18 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     alignSelf: 'center',
   },
-  logoText: 
+  logoText:
   {
     fontSize: 26,
     lineHeight: 25,
     fontWeight: 'bold',
-    color: '#069139'
+    color: '#069139',
   },
-  form: 
+  form:
   {
-    alignItems: 'center'
+    alignItems: 'center',
   },
-  textInput: 
+  textInput:
   {
     width: '45%',
     height: 40,
@@ -320,15 +348,15 @@ const styles = StyleSheet.create({
     marginTop: 30,
     borderWidth: 3,
     borderColor: '#069139',
-    backgroundColor: '#069139'
+    backgroundColor: '#069139',
   },
   signupText:
   {
-    color: 'white', 
-    fontWeight: 'bold', 
-    fontSize: 20
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 20,
   },
-  loginNav: 
+  loginNav:
   {
     alignItems: 'center',
     position: 'absolute',
@@ -336,39 +364,39 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
   },
-  loginNavText: 
+  loginNavText:
   {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#0047AB',
-    textDecorationLine: 'underline'
+    textDecorationLine: 'underline',
   },
   errorMessage:
   {
     color: 'red',
-    textAlign: 'center'
+    textAlign: 'center',
   },
-  modalContainer: 
+  modalContainer:
   {
     backgroundColor: 'rgba(52, 52, 52, 0.8)',
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  modalStyle: 
+  modalStyle:
   {
     backgroundColor: '#E5E4E2',
     borderRadius: 10,
     padding: 15,
     width: '80%',
-    borderColor: '#069139', 
-    borderWidth: 3, 
+    borderColor: '#069139',
+    borderWidth: 3,
   },
   modalText:
   {
     fontSize: 16,
-    textAlign: 'center'
-  }
-})
+    textAlign: 'center',
+  },
+});
 
-export default Signup
+export default Signup;

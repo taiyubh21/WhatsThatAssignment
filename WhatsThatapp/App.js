@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { View } from 'react-native';
 
 // Stack navigation for App
 
@@ -15,22 +14,22 @@ import TabNavScreen from './components/TabNav';
 
 const Stack = createNativeStackNavigator();
 
+// eslint-disable-next-line react/prefer-stateless-function
 export default class App extends Component {
-  render(){
-    return(
+  render() {
+    return (
       // Stack navigation inside Navigator Container
       // First navigator in the navigation hierarchy
       <NavigationContainer>
-        {/* Hide navigation headers on the app*/}
-        {/* Making the login page the default initial page shown*/}
-        <Stack.Navigator screenOptions={{headerShown: false}} initialRouteName='Login'>
-          {/* The screens in the stack navigation*/}
-          <Stack.Screen name = 'Login' component={LoginScreen} />
-          <Stack.Screen name = 'Signup' component={SignupScreen} />
-          <Stack.Screen name = 'TabNav' component={TabNavScreen} />
+        {/* Hide navigation headers on the app */}
+        {/* Making the login page the default initial page shown */}
+        <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="Login">
+          {/* The screens in the stack navigation */}
+          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="Signup" component={SignupScreen} />
+          <Stack.Screen name="TabNav" component={TabNavScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     );
-
-}
+  }
 }

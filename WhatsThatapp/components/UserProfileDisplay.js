@@ -137,7 +137,7 @@ class ProfileUpdate extends Component {
         if (response.status === 200) {
           return response.blob();
         }
-        throw new Error('Something went wrong');
+        throw 'Something went wrong';
       })
       .then((resBlob) => {
         const data = URL.createObjectURL(resBlob);
@@ -164,7 +164,7 @@ class ProfileUpdate extends Component {
         if (response.status === 200) {
           return response.json();
         }
-        throw new Error('Something went wrong');
+        throw 'Something went wrong';
       })
       .then((responseJson) => {
         // Updating each state with their data
@@ -227,9 +227,9 @@ class ProfileUpdate extends Component {
             }, 4000),
           });
         } else if (response.status === 400) {
-          throw new Error('Please try again');
+          throw 'Please try again';
         } else {
-          throw new Error('Something went wrong');
+          throw 'Something went wrong';
         }
       })
       .catch((error) => {

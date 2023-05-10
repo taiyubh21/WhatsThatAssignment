@@ -59,7 +59,7 @@ class Chats extends Component {
         if (response.status === 200) {
           return response.json();
         }
-        throw new Error('error');
+        throw 'error';
       })
       .then((responseJson) => {
         this.setState({
@@ -93,7 +93,7 @@ class Chats extends Component {
         if (response.status === 201) {
           return response.json();
         }
-        throw new Error('error');
+        throw 'error';
       })
       .then((rjson) => {
         console.log(rjson);

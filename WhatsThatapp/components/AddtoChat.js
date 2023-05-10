@@ -76,7 +76,7 @@ class AddtoChat extends Component {
         if (response.status === 200) {
           return response.json();
         }
-        throw new Error('error');
+        throw 'error';
       })
       .then((responseJson) => {
         this.setState({
@@ -108,7 +108,7 @@ class AddtoChat extends Component {
         if (response.status === 200) {
           return response.json();
         }
-        throw new Error('error');
+        throw 'error';
       })
       .then((responseJson) => {
         this.setState({
@@ -133,7 +133,7 @@ class AddtoChat extends Component {
         if (response.status === 200) {
           return response.blob();
         }
-        throw new Error('Something went wrong');
+        throw 'Something went wrong';
       })
       .then((resBlob) => {
         const data = URL.createObjectURL(resBlob);
@@ -165,7 +165,7 @@ class AddtoChat extends Component {
         if (response.status === 200) {
           return response.json();
         }
-        throw new Error('error');
+        throw 'error';
       })
       .then((responseJson) => {
         this.setState({
@@ -196,7 +196,7 @@ class AddtoChat extends Component {
           this.getMembers();
           this.getData();
         } else {
-          throw new Error('error');
+          throw 'error';
         }
       })
       .catch((error) => {

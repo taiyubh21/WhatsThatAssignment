@@ -34,7 +34,7 @@ class Logout extends Component {
           await AsyncStorage.removeItem('whatsthat_user_id');
           this.props.navigation.navigate('Login');
         } else {
-          throw new Error('Something went wrong');
+          throw 'Something went wrong';
         }
       })
       .catch((error) => {

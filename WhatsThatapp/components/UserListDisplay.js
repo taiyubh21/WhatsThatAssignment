@@ -78,7 +78,7 @@ class UserListDisplay extends Component {
         if (response.status === 200) {
           return response.json();
         }
-        throw new Error('error');
+        throw 'error';
       })
       .then((responseJson) => {
         // Updating the userListData state with the retrieved data
@@ -105,7 +105,7 @@ class UserListDisplay extends Component {
         if (response.status === 200) {
           return response.json();
         }
-        throw new Error('error');
+        throw 'error';
       })
       .then((responseJson) => {
         // Updating the contactData state with the retrieved data
@@ -132,7 +132,7 @@ class UserListDisplay extends Component {
         if (response.status === 200) {
           return response.json();
         }
-        throw new Error('error');
+        throw 'error';
       })
       .then((responseJson) => {
         // Updating the contactData state with the retrieved data
@@ -162,7 +162,7 @@ class UserListDisplay extends Component {
         if (response.status === 200) {
           return response.json();
         }
-        throw new Error('error');
+        throw 'error';
       })
       .then((responseJson) => {
         // Updating the newUserListData state with the retrieved data
@@ -193,8 +193,7 @@ class UserListDisplay extends Component {
           this.getContacts();
           // Else if its bad then throw an error
         } else {
-          // Output error on screen for other responses
-          throw new Error('error');
+          throw 'error';
         }
       })
       .catch((error) => {

@@ -93,7 +93,7 @@ class ConversationDisplay extends Component {
         if (response.status === 200) {
           return response.json();
         }
-        throw new Error('error');
+        throw 'error';
       })
       .then((responseJson) => {
         this.setState({
@@ -132,7 +132,7 @@ class ConversationDisplay extends Component {
           this.getData();
           console.log(this.state.message);
         } else {
-          throw new Error('error');
+          throw 'error';
         }
       })
       .catch((error) => {
@@ -170,9 +170,9 @@ class ConversationDisplay extends Component {
           this.setState({ modalVisible: false, selectedMessageId: null });
           this.getData();
         } else if (response.status === 400) {
-          throw new Error('Please try again');
+          throw 'Please try again';
         } else {
-          throw new Error('error');
+          throw 'error';
         }
       })
       .catch((error) => {
@@ -207,9 +207,9 @@ class ConversationDisplay extends Component {
           this.getData();
         } else if (response.status === 401) {
           // Output error on screen for other responses
-          throw new Error('Please try again');
+          throw 'Please try again';
         } else {
-          throw new Error('error');
+          throw 'error';
         }
       })
       .catch((error) => {

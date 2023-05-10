@@ -132,9 +132,9 @@ class Login extends Component {
           // Else if its bad then throw an error
         } if (response.status === 400) {
           // Output error on screen if theres a 400 response
-          throw new Error('Retype password and/or email');
+          throw 'Retype email and/or password';
         } else if (response.status === 500) {
-          throw new Error('Please try again');
+          throw 'Please try again';
         }
         return null;
       })
@@ -150,7 +150,7 @@ class Login extends Component {
           this.props.navigation.navigate('TabNav');
           // Throw error if something is wrong
         } catch {
-          throw new Error('Something went wrong');
+          throw 'Something went wrong';
         }
       })
       .catch((error) => {

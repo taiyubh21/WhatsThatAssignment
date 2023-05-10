@@ -194,9 +194,9 @@ class Signup extends Component {
         if (response.status === 201) {
           return response.json();
         } if (response.status === 400) {
-          throw new Error('Email already exists. Please try again');
+          throw 'Email already exists. Please try again';
         } else if (response.status === 500) {
-          throw new Error('Something went wrong');
+          throw 'Something went wrong';
         }
         return null;
       })

@@ -24,5 +24,6 @@ module.exports = {
     'react/destructuring-assignment': 'off',
     'linebreak-style': 'off',
     'react/no-unused-state': 'off',
+    'no-throw-literal': 'off',
   },
 };

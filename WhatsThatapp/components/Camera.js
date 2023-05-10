@@ -51,7 +51,7 @@ export default function CameraSendToServer({ navigation }) {
           console.log('Image has been updated');
           navigation.navigate('UserProfileDisplay');
         } else {
-          throw new Error('error');
+          throw 'error';
         }
       })
       .catch((err) => {

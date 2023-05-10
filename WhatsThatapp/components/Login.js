@@ -198,6 +198,7 @@ class Login extends Component {
           <TouchableOpacity style={styles.loginButton} onPress={this.onPressButton}>
             <Text style={styles.loginText}>Login</Text>
           </TouchableOpacity>
+          <Text>{' '}</Text>
           {/* Output error if there is an error */}
           {/* eslint-disable-next-line react/jsx-no-useless-fragment */}
           <>

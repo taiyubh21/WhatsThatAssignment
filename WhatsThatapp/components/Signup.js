@@ -165,6 +165,11 @@ class Signup extends Component {
     // Check if password is valid
     if (!PASSWORD_REGEX.test(this.state.password)) {
       this.setState({ error: "Password isn't strong enough (One upper, one lower, one special, one number, at least 8 characters long)" });
+      this.setState({
+        errorTimer: setTimeout(() => {
+          this.setState({ error: null, errorTimer: null });
+        }, 3000),
+      });
       return;
     }
 
